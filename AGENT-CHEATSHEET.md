@@ -1,13 +1,13 @@
-# 🤖 Claude Code 멀티 에이전트 치트시트
+# Claude Code Multi-Agent Cheatsheet
 
-## 빠른 시작 — 이 명령어들만 알면 된다
+## 빠른 시작
 
 ### 에이전트 확인
 ```
 /agents
 ```
 
-### 전체 파이프라인 (가장 많이 씀)
+### 전체 파이프라인
 ```
 Use the orchestrator to [큰 작업 설명]
 ```
@@ -18,43 +18,43 @@ Use the orchestrator to add user profile image upload feature with S3
 
 ---
 
-## 상황별 프롬프트 모음
+## 상황별 프롬프트
 
-### 🆕 새 기능 개발 (전체 파이프라인)
+### 새 기능 개발
 ```
 Use the orchestrator to implement [기능명].
 Requirements:
 - [요구사항 1]
 - [요구사항 2]
-Run the full pipeline: planner → implementer → reviewer → tester
+Run the full pipeline: planner -> implementer -> reviewer -> tester
 ```
 
-### 🐛 버그 수정
+### 버그 수정
 ```
 Use the orchestrator to fix the bug where [버그 설명].
 The issue seems to be in [파일/모듈].
 After fixing, have reviewer verify and tester add regression tests.
 ```
 
-### 🔍 코드 리뷰만
+### 코드 리뷰만
 ```
 Have the reviewer subagent review src/[파일경로].
 Focus on security and error handling.
 ```
 
-### 🔐 보안 점검
+### 보안 점검
 ```
 Have security-auditor do a full OWASP audit of src/api/
 Report all findings by severity.
 ```
 
-### ⚡ 성능 분석
+### 성능 분석
 ```
 Have performance-optimizer analyze [파일/기능].
 The symptom is: [느린 부분 설명]
 ```
 
-### 🗄️ DB 작업
+### DB 작업
 ```
 Have database-expert design the schema for [기능].
 Requirements:
@@ -62,7 +62,7 @@ Requirements:
 Include migration files and index strategy.
 ```
 
-### 📝 문서화
+### 문서화
 ```
 Have documenter update README.md and add JSDoc to src/api/
 Make it clear enough for a new developer to onboard in 30 minutes.
@@ -70,7 +70,7 @@ Make it clear enough for a new developer to onboard in 30 minutes.
 
 ---
 
-## 병렬 실행 (빠르게 여러 작업 동시에)
+## 병렬 실행
 ```
 Run these in parallel:
 1. Have planner design the auth module
@@ -81,7 +81,7 @@ Then have implementer execute the combined plan.
 
 ---
 
-## Agent Teams 모드 (에이전트끼리 직접 소통)
+## Agent Teams 모드
 
 터미널 3개를 나란히 열고:
 
@@ -95,19 +95,17 @@ claude --model claude-opus-4-5
 
 **터미널 2 (모니터링)**
 ```bash
-# 공유 태스크 파일 실시간 확인
 watch -n 1 cat .claude/team-tasks.md
 ```
 
 **터미널 3 (추가 지시)**
 ```bash
-# 필요시 특정 에이전트에게 직접 지시
 claude --agent reviewer "re-check src/auth after implementer changes"
 ```
 
 ---
 
-## 컨텍스트 관리 (비용 절약)
+## 컨텍스트 관리
 
 | 상황 | 명령 |
 |------|------|
@@ -118,17 +116,12 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 
 ---
 
-## 에이전트별 모델 & 비용 구조
+## 에이전트별 모델 & 비용
 
 ```
-opus   → orchestrator, planner, security-auditor
-         (복잡한 판단이 필요한 곳)
-
-sonnet → implementer, reviewer, tester, performance-optimizer, database-expert  
-         (실행 위주, 비용 효율)
-
-haiku  → documenter
-         (단순 반복 작업, 최저 비용)
+Opus   -> orchestrator, planner, security-auditor
+Sonnet -> implementer, reviewer, tester, performance-optimizer, database-expert
+Haiku  -> documenter
 ```
 
 ---
@@ -137,7 +130,7 @@ haiku  → documenter
 
 **에이전트가 안 보일 때**
 ```
-/agents  ← 목록 확인
+/agents
 ```
 `.claude/agents/` 폴더에 .md 파일 있는지 확인
 
@@ -147,7 +140,6 @@ haiku  → documenter
 ```
 
 **에이전트가 범위를 벗어날 때**
-프롬프트에 명시적으로 제한:
 ```
 Have reviewer ONLY review src/auth.ts.
 Do NOT suggest changes to other files.
