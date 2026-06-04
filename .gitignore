@@ -1,0 +1,13 @@
+# Claude Code 자동 생성 파일
+.claude/cache/
+.claude/sessions/
+.claude/daemon/
+.claude/telemetry/
+.claude/history.jsonl
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
