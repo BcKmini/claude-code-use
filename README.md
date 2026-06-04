@@ -1,5 +1,9 @@
 # Claude Code Multi-Agent System
 
+<div align="center">
+  <img src="assets/claude.png" alt="Claude" width="500">
+</div>
+
 > Claude Code를 위한 9개 전문 에이전트 시스템 — 복잡한 작업을 역할별 AI에게 분산시켜 품질과 효율을 동시에 높인다.
 
 ![Claude Code Compatible](https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic)
