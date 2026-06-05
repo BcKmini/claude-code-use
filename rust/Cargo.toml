@@ -1,0 +1,3 @@
+[workspace]
+members = ["claude-tools"]
+resolver = "2"

@@ -189,6 +189,72 @@ clawhip이 GitHub PR/Issue 이벤트 감지
 
 ---
 
+---
+
+## claude-tools Rust 바이너리
+
+이 레포에는 Python 도구 세 가지를 하나의 Rust 바이너리로 컴파일한 `claude-tools`가 포함되어 있다.
+
+```
+rust/
+├── Cargo.toml                ← workspace
+└── claude-tools/
+    ├── Cargo.toml            ← clap 4, serde, chrono, dirs, anyhow, regex
+    └── src/
+        ├── main.rs           ← clap derive CLI (snippet / handoff / cost)
+        ├── snippet.rs        ← ~/.claude/snippets.json 관리
+        ├── handoff.rs        ← ~/.claude/handoffs/ 세션 문서
+        ├── cost.rs           ← ~/.claude/projects/ JSONL 파싱 + 비용 추정
+        └── colors.rs         ← ANSI 컬러 헬퍼
+```
+
+### 빌드
+
+```bash
+cd rust
+cargo build --release
+# 바이너리: rust/target/release/claude-tools
+```
+
+### claw-code와 함께 사용
+
+`claude-tools`는 claw-code와 같은 Rust 생태계를 사용한다. 두 바이너리를 PATH에 함께 등록하면 Python 없이도 전체 워크플로우가 가능하다:
+
+```bash
+# ~/.bashrc 또는 ~/.zshrc
+export PATH="$PATH:/path/to/claude-tools/target/release"
+export PATH="$PATH:/path/to/claw-code/target/release"
+```
+
+#### 세션 워크플로우 (Python 없이)
+
+```bash
+# 1. claw로 코딩 세션 시작
+claw
+
+# 2. 세션 종료 전 핸드오프 저장
+claude-tools handoff save --note "auth 완료, 다음: 테스트 작성"
+
+# 3. 비용 확인
+claude-tools cost month
+
+# 4. 다음 세션에서 컨텍스트 복원
+claude-tools handoff load | claude
+# 또는
+claude-tools handoff load | claw
+```
+
+### 의존성 비교
+
+| | Python 도구 | claude-tools (Rust) |
+|--|------------|---------------------|
+| 런타임 | Python 3.8+ 필요 | 단일 바이너리, 의존성 없음 |
+| 속도 | 보통 | 빠름 |
+| 배포 | 파일 복사 | 바이너리 1개 복사 |
+| claw-code 연동 | 별도 설치 필요 | 동일 Cargo workspace 가능 |
+
+---
+
 ## 릴레이티드 링크
 
 - [claw-code (ultraworkers)](https://github.com/ultraworkers/claw-code)
