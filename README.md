@@ -1,11 +1,15 @@
 # Claude Code Multi-Agent System
+<div align="center">
+<img src="https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic" />
+<img src="https://img.shields.io/badge/Agents-9-green?style=flat-square" />
+<img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey?style=flat-square" />
+<img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
+</div>
 
-> Claude Code를 위한 9개 전문 에이전트 시스템 — 복잡한 작업을 역할별 AI에게 분산시켜 품질과 효율을 동시에 높인다.
+<div align="center">
+  <img src="assets/claude.png" alt="Claude" width="500">
+</div>
 
-![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic)
-![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ---
 
