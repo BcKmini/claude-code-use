@@ -1,45 +1,46 @@
-# claw-code 통합 가이드
+[← Back to README](./README.md)
 
-`claude-code-multi-agent`와 `claw-code`는 서로 다른 층을 담당하며 함께 쓸 때 더 강력하다.
+**[한국어](INTEGRATION.ko.md)** · **English**
 
-| 시스템 | 역할 | 링크 |
+# Integration Guide — claw-code & claude-tools
+
+`Claudecode-Agent` and `claw-code` operate at different layers and are more powerful together.
+
+| System | Role | Link |
 |--------|------|------|
-| claude-code-multi-agent | 에이전트 정의 (9개 에이전트 역할·동작 규칙) | 이 레포 |
-| claw-code | CLI 하네스 런타임 (Rust 기반 오픈소스 CLI) | [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) |
+| Claudecode-Agent | Agent definitions (9 agent roles + behavior rules) + CLI tools | This repo |
+| claw-code | CLI harness runtime (open-source Rust CLI) | [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) |
 
 ---
 
-## claw-code 개요
+## claw-code Overview
 
-claw-code는 Claude Code CLI와 함께 쓸 수 있는 오픈소스 Rust CLI 하네스다.
+claw-code is an open-source Rust CLI harness that works alongside Claude Code CLI.
 
-**핵심 특징:**
-- 다중 AI 프로바이더 지원 (Anthropic, OpenAI 호환)
-- REPL 스타일 세션 관리
-- RAG 서비스 (Qdrant + 벡터 DB)
-- 컨테이너 지원 (Docker/Podman)
-- 머신리더블 JSON 스테이트 출력
-- clawhip 이벤트 라우팅
+**Key features:**
+- Multi-AI-provider support (Anthropic, OpenAI-compatible)
+- REPL-style session management
+- RAG service (Qdrant + vector DB)
+- Container support (Docker/Podman)
+- Machine-readable JSON state output
+- clawhip event routing
 
 ---
 
-## 빠른 시작
+## Quick Start
 
-### claw-code 빌드 (Windows PowerShell)
+### Build claw-code (Windows PowerShell)
 
 ```powershell
 git clone https://github.com/ultraworkers/claw-code
 cd claw-code\rust
 cargo build --workspace
 
-# 키 설정
 $env:ANTHROPIC_API_KEY = "sk-ant-..."
-
-# 헬스체크
 .\target\debug\claw.exe doctor
 ```
 
-### claw-code 빌드 (Mac/Linux)
+### Build claw-code (macOS/Linux)
 
 ```bash
 git clone https://github.com/ultraworkers/claw-code
@@ -50,150 +51,142 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 ./target/debug/claw doctor
 ```
 
-### 프로젝트 초기화
+### Initialize a project
 
 ```bash
-# 프로젝트 루트에서
 claw init
 ```
 
-`.claw`, `.claw.json`, `CLAUDE.md` 생성. **이 레포의 `CLAUDE.md`를 복사해 덮어쓰면 에이전트 가이드라인이 claw-code에도 적용된다.**
+Creates `.claw`, `.claw.json`, `CLAUDE.md`. **Copy this repo's `CLAUDE.md` over it to apply the agent guidelines inside claw-code sessions.**
 
 ---
 
-## 두 시스템의 역할 분리
+## Separation of Concerns
 
 ```
-claude-code-multi-agent          claw-code
+Claudecode-Agent                 claw-code
        |↓                               |↓
-  9개 에이전트 정의          CLI 하네스 런타임
-  (roles, tools, prompts)     (session, RAG, events)
+  9 agent definitions          CLI harness runtime
+  (roles, tools, prompts)      (session, RAG, events)
        |↓                               |↓
-  Claude Code CLI              claw CLI
-  (claude 명령)              (claw 명령)
+  Claude Code CLI               claw CLI
+  (claude command)              (claw command)
        \___________________________/
                  |↓
-          동일한 agents/*.md 각복 가능
+         shared agents/*.md definitions
 ```
 
-**에이전트 정의 (`agents/*.md`)는 양쪽 런타임에서 모두 동작한다.**
-Claude Code의 `/agents`를 쓰든, claw-code의 REPL을 쓰든 동일한 에이전트 역할 정의가 적용된다.
+**Agent definitions (`agents/*.md`) work in both runtimes.**
+Whether you use Claude Code's `/agents` or the claw-code REPL, the same agent role definitions apply.
 
 ---
 
-## 통합 포인트
+## Integration Points
 
-### 1. CLAUDE.md 공유
+### 1. Shared CLAUDE.md
 
-`claw init` 실행 후 생성된 `CLAUDE.md`를 이 레포의 `CLAUDE.md`로 덮어쓰면 된다.
+After running `claw init`, replace the generated `CLAUDE.md` with this repo's version:
 
 ```bash
-# 프로젝트 루트에서
 claw init
-cp /path/to/claude-code-multi-agent/CLAUDE.md ./CLAUDE.md
+cp /path/to/Claudecode-Agent/CLAUDE.md ./CLAUDE.md
 ```
 
-이후 claw-code 세션에서도 에이전트 시스템 가이드라인이 적용된다.
+The agent system guidelines then apply inside claw-code sessions too.
 
-### 2. 에이전트 정의 공유
+### 2. Shared Agent Definitions
 
-claw-code는 `~/.claude/agents/`가 아닌 자체 에이전트 시스템을 쓴. 하지만 **orchestrator 패턴**은 claw-code에서도 적용 가능하다:
+claw-code uses its own agent system rather than `~/.claude/agents/`. However, the **orchestrator pattern** works in claw-code directly:
 
 ```
-# claw REPL 안에서
+# Inside claw REPL
 Use the orchestrator to implement [feature].
 Run the full pipeline: planner -> implementer -> reviewer -> tester
 ```
 
-role prompt 자체는 claw-code REPL에 직접 활용.
+### 3. RAG Service (Qdrant)
 
-### 3. RAG 서비스 (Qdrant)
-
-claw-code는 Qdrant 벡터 DB를 이용한 RAG를 지원한다.
-context7 MCP를 대체하거나 보완하는 방식으로 활용 가능.
+claw-code supports RAG via Qdrant vector DB — use it as an alternative or complement to context7 MCP.
 
 ```bash
-# RAG 서비스 실행 (docker-compose)
+# Start RAG service (docker-compose)
 cd claw-code
 docker compose up qdrant rag-serve -d
 
-# GitHub MCP 컨테이너도 함께 실행
+# Also start GitHub MCP container
 docker run -d \
   -e GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token \
   ghcr.io/github/github-mcp-server stdio
 ```
 
-**Docker 실행 순서 (권장):**
+**Recommended Docker startup order:**
 
 ```bash
-# 1. Qdrant (RAG 벡터 DB)
+# 1. Qdrant (RAG vector DB)
 docker compose up qdrant -d
 
-# 2. RAG 서비스 (Qdrant 의존)
+# 2. RAG service (depends on Qdrant)
 docker compose up rag-serve -d
 
-# 3. GitHub MCP 서버
+# 3. GitHub MCP server
 docker run -d --restart always \
   -e GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_token \
   ghcr.io/github/github-mcp-server stdio
 ```
 
-### 4. 코드베이스 인덱싱 (RAG 입력)
+### 4. Codebase Indexing (RAG input)
 
 ```bash
-# 워크스페이스를 Qdrant에 인덱싱
 docker compose run rag-ingest
 ```
 
-이후 claw 세션에서 코드베이스 관련 질문시 RAG가 관련 코드를 자동으로 참조.
+After indexing, claw sessions automatically reference relevant code when answering codebase questions.
 
-### 5. 이벤트 라우팅 비교
+### 5. Event Routing Comparison
 
-| 기능 | Claude Code | claw-code |
-|------|-------------|----------|
-| 동작 방지 훅 | hookify 플러그인 | clawhip 이벤트 |
-| 알림 | 없음 | clawhip 쳄널 (Discord 등) |
-| 세션 모니터링 | session-report 플러그인 | claw status / JSON 출력 |
-| 멀티 에이전트 | orchestrator 에이전트 | oh-my-openagent (OmO) |
+| Feature | Claude Code | claw-code |
+|---------|-------------|-----------|
+| Block unwanted behaviors | hookify plugin | clawhip events |
+| Notifications | none | clawhip channels (Discord, etc.) |
+| Session monitoring | session-report plugin | claw status / JSON output |
+| Multi-agent | orchestrator agent | oh-my-openagent (OmO) |
 
 ---
 
-## 권장 워크플로우
+## Recommended Workflows
 
-### 코드 작업 (Claude Code + 멀티 에이전트)
+### Coding (Claude Code + multi-agent)
 
 ```
-claude 실행
-  -> orchestrator에게 작업 위임
-  -> planner -> implementer -> reviewer -> tester 파이프라인
-  -> GitHub MCP로 PR 생성
+Run claude
+  -> Delegate task to orchestrator
+  -> planner -> implementer -> reviewer -> tester pipeline
+  -> Create PR via GitHub MCP
 ```
 
-### 코드베이스 탐색 (claw-code + RAG)
+### Codebase Exploration (claw-code + RAG)
 
 ```
 docker compose up qdrant rag-serve -d
-claw 실행
+Run claw
   -> /doctor
-  -> RAG가 인덱싱된 코드베이스 관련 쿼리 지원
+  -> RAG answers codebase queries from indexed code
 ```
 
-### 자동화 파이프라인 (claw-code + clawhip)
+### Automated Pipeline (claw-code + clawhip)
 
 ```
-clawhip이 GitHub PR/Issue 이벤트 감지
-  -> claw 세션 자동 시작
-  -> orchestrator 패턴으로 작업 실행
-  -> 결과를 Discord 등 채널로 전송
+clawhip detects GitHub PR/Issue event
+  -> auto-starts claw session
+  -> executes task with orchestrator pattern
+  -> sends result to Discord or other channel
 ```
 
 ---
 
----
+## claude-tools Rust Binary
 
-## claude-tools Rust 바이너리
-
-이 레포에는 Python 도구 세 가지를 하나의 Rust 바이너리로 컴파일한 `claude-tools`가 포함되어 있다.
+This repo includes `claude-tools` — all three Python tools compiled into a single Rust binary.
 
 ```
 rust/
@@ -202,63 +195,63 @@ rust/
     ├── Cargo.toml            ← clap 4, serde, chrono, dirs, anyhow, regex
     └── src/
         ├── main.rs           ← clap derive CLI (snippet / handoff / cost)
-        ├── snippet.rs        ← ~/.claude/snippets.json 관리
-        ├── handoff.rs        ← ~/.claude/handoffs/ 세션 문서
-        ├── cost.rs           ← ~/.claude/projects/ JSONL 파싱 + 비용 추정
-        └── colors.rs         ← ANSI 컬러 헬퍼
+        ├── snippet.rs        ← manages ~/.claude/snippets.json
+        ├── handoff.rs        ← manages ~/.claude/handoffs/ session docs
+        ├── cost.rs           ← parses ~/.claude/projects/ JSONL + cost estimates
+        └── colors.rs         ← ANSI color helpers
 ```
 
-### 빌드
+### Build
 
 ```bash
 cd rust
 cargo build --release
-# 바이너리: rust/target/release/claude-tools
+# binary: rust/target/release/claude-tools
 ```
 
-### claw-code와 함께 사용
+### Use with claw-code
 
-`claude-tools`는 claw-code와 같은 Rust 생태계를 사용한다. 두 바이너리를 PATH에 함께 등록하면 Python 없이도 전체 워크플로우가 가능하다:
+`claude-tools` uses the same Rust ecosystem as claw-code. Add both binaries to PATH for a fully Python-free workflow:
 
 ```bash
-# ~/.bashrc 또는 ~/.zshrc
+# ~/.bashrc or ~/.zshrc
 export PATH="$PATH:/path/to/claude-tools/target/release"
 export PATH="$PATH:/path/to/claw-code/target/release"
 ```
 
-#### 세션 워크플로우 (Python 없이)
+#### Session workflow (no Python)
 
 ```bash
-# 1. claw로 코딩 세션 시작
+# 1. Start coding session with claw
 claw
 
-# 2. 세션 종료 전 핸드오프 저장
-claude-tools handoff save --note "auth 완료, 다음: 테스트 작성"
+# 2. Save handoff before ending session
+claude-tools handoff save --note "auth done, next: write tests"
 
-# 3. 비용 확인
+# 3. Check costs
 claude-tools cost month
 
-# 4. 다음 세션에서 컨텍스트 복원
+# 4. Resume context in next session
 claude-tools handoff load | claude
-# 또는
+# or
 claude-tools handoff load | claw
 ```
 
-### 의존성 비교
+### Dependency Comparison
 
-| | Python 도구 | claude-tools (Rust) |
-|--|------------|---------------------|
-| 런타임 | Python 3.8+ 필요 | 단일 바이너리, 의존성 없음 |
-| 속도 | 보통 | 빠름 |
-| 배포 | 파일 복사 | 바이너리 1개 복사 |
-| claw-code 연동 | 별도 설치 필요 | 동일 Cargo workspace 가능 |
+| | Python tools | claude-tools (Rust) |
+|--|-------------|---------------------|
+| Runtime | Python 3.8+ required | Single binary, no dependencies |
+| Speed | Normal | Fast |
+| Deployment | Copy files | Copy one binary |
+| claw-code integration | Separate install | Same Cargo workspace possible |
 
 ---
 
-## 릴레이티드 링크
+## Related Links
 
 - [claw-code (ultraworkers)](https://github.com/ultraworkers/claw-code)
-- [clawhip 이벤트 라우터](https://github.com/Yeachan-Heo/clawhip)
-- [oh-my-openagent 멀티에이전트 조율](https://github.com/code-yeongyu/oh-my-openagent)
+- [clawhip event router](https://github.com/Yeachan-Heo/clawhip)
+- [oh-my-openagent multi-agent orchestration](https://github.com/code-yeongyu/oh-my-openagent)
 - [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)
 - [UltraWorkers Discord](https://discord.gg/5TUQKqFWd)

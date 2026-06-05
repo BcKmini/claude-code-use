@@ -14,7 +14,7 @@
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#에이전트-구성)
 [![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#도구)
 
-**[English README](README.md)** · **[환경 세팅](SETUP.md)** · **[치트시트](AGENT-CHEATSHEET.md)** · **[claw-code 연동](INTEGRATION.md)**
+**[English README](README.md)** · **[환경 세팅](SETUP.ko.md)** · **[치트시트](AGENT-CHEATSHEET.ko.md)** · **[연동 가이드](INTEGRATION.ko.md)** · **[기여 가이드](CONTRIBUTING.ko.md)**
 
 </div>
 
@@ -388,13 +388,14 @@ Claudecode-Agent/
 
 ## 전체 문서 목록
 
-| 문서 | 내용 |
-|------|------|
-| [SETUP.md](SETUP.md) | 전체 환경 세팅: MCP 서버·Docker·플러그인·환경변수 |
-| [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | 20개 이상 바로 복붙 가능한 프롬프트 |
-| [INTEGRATION.md](INTEGRATION.md) | claw-code (Rust CLI 하네스) + `claude-tools` 연동 |
-| [CLAUDE.md](CLAUDE.md) | 코딩 원칙 및 응답 스타일 가이드라인 |
-| [README.md](README.md) | 영문 버전 README |
+| 문서 | 한국어 | English |
+|------|--------|---------|
+| 환경 세팅 가이드 | [SETUP.ko.md](SETUP.ko.md) | [SETUP.md](SETUP.md) |
+| 에이전트 치트시트 | [AGENT-CHEATSHEET.ko.md](AGENT-CHEATSHEET.ko.md) | [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) |
+| 통합 가이드 (claw-code + Rust) | [INTEGRATION.ko.md](INTEGRATION.ko.md) | [INTEGRATION.md](INTEGRATION.md) |
+| 기여 가이드 | [CONTRIBUTING.ko.md](CONTRIBUTING.ko.md) | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| 코딩 가이드라인 | [CLAUDE.ko.md](CLAUDE.ko.md) | [CLAUDE.md](CLAUDE.md) |
+| README | [README.ko.md](README.ko.md) | [README.md](README.md) |
 
 ---
 

@@ -14,7 +14,7 @@
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#agent-roster)
 [![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#tools)
 
-**[한국어 README](README.ko.md)** · **[Setup Guide](SETUP.md)** · **[Cheatsheet](AGENT-CHEATSHEET.md)** · **[claw-code Integration](INTEGRATION.md)**
+**[한국어 README](README.ko.md)** · **[Setup Guide](SETUP.md)** · **[Cheatsheet](AGENT-CHEATSHEET.md)** · **[Integration](INTEGRATION.md)** · **[Contributing](CONTRIBUTING.md)**
 
 </div>
 
@@ -389,13 +389,14 @@ Claudecode-Agent/
 
 ## Full Documentation
 
-| Document | Contents |
-|----------|----------|
-| [SETUP.md](SETUP.md) | Complete env setup: MCP servers, Docker, plugins, env vars |
-| [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | 20+ copy-paste-ready prompts |
-| [INTEGRATION.md](INTEGRATION.md) | claw-code (Rust CLI harness) + `claude-tools` Rust binary |
-| [CLAUDE.md](CLAUDE.md) | Coding principles and response style guidelines |
-| [README.ko.md](README.ko.md) | Korean version of this README |
+| Document | EN | KO |
+|----------|----|-----|
+| Setup Guide | [SETUP.md](SETUP.md) | [SETUP.ko.md](SETUP.ko.md) |
+| Agent Cheatsheet | [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | [AGENT-CHEATSHEET.ko.md](AGENT-CHEATSHEET.ko.md) |
+| Integration (claw-code + Rust) | [INTEGRATION.md](INTEGRATION.md) | [INTEGRATION.ko.md](INTEGRATION.ko.md) |
+| Contributing Guide | [CONTRIBUTING.md](CONTRIBUTING.md) | [CONTRIBUTING.ko.md](CONTRIBUTING.ko.md) |
+| Coding Guidelines | [CLAUDE.md](CLAUDE.md) | [CLAUDE.ko.md](CLAUDE.ko.md) |
+| README | [README.md](README.md) | [README.ko.md](README.ko.md) |
 
 ---
 

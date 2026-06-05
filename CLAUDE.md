@@ -1,99 +1,106 @@
-[← README로 돌아가기](./README.md)
+[← Back to README](./README.md)
 
-# CLAUDE.md — 개인 개발 가이드라인
+**[한국어](CLAUDE.ko.md)** · **English**
 
-풀스택 + AI 멀티프로젝트 환경에 맞춘 코딩 행동 원칙.
-프로젝트별 CLAUDE.md와 병합해서 사용.
+# CLAUDE.md — Personal Development Guidelines
 
----
-
-## 1. 코딩 전에 먼저 생각하라 (Think Before Coding)
-
-**가정하지 말고, 혼란을 숨기지 말고, 트레이드오프를 드러내라.**
-
-- 가정이 있으면 명시적으로 말하라. 불확실하면 물어라.
-- 해석이 여러 개라면 모두 제시하라 — 혼자 조용히 고르지 마라.
-- 더 단순한 접근이 있으면 먼저 말하라.
-- 뭔가 불명확하면 멈춰라. 뭐가 헷갈리는지 짚고 물어라.
-
-## 2. 단순함이 먼저다 (Simplicity First)
-
-**문제를 푸는 최소한의 코드. 추측성 코드는 없다.**
-
-- 요청받지 않은 기능은 추가하지 않는다.
-- 단일 사용 코드에 추상화 레이어를 만들지 않는다.
-- 요청받지 않은 "유연성"이나 "설정 가능성"은 넣지 않는다.
-- 불가능한 시나리오에 대한 에러 처리는 하지 않는다.
-- 200줄로 쓰고 50줄로 될 수 있다면 다시 써라.
-
-## 3. 필요한 것만 건드려라 (Surgical Changes)
-
-**반드시 바꿔야 하는 것만 건드려라. 내 것만 정리해라.**
-
-기존 코드 수정 시:
-- 인접한 코드, 주석, 포맷을 "개선"하지 마라.
-- 멀쩡한 것을 리팩터링하지 마라.
-- 내가 다르게 할지라도 기존 스타일을 맞춰라.
-- 관련 없는 죽은 코드는 발견하면 언급만 하고 삭제하지 마라.
-
-내 변경이 만든 고아는 처리하라:
-- 내 변경으로 인해 쓰이지 않게 된 import/변수/함수는 제거하라.
-- 기존에 있던 데드 코드는 요청 없이 건드리지 마라.
-
-## 4. 목표 기반 실행 (Goal-Driven Execution)
-
-**성공 기준을 정의하라. 검증될 때까지 루프하라.**
-
-작업을 검증 가능한 목표로 변환:
-- "검증 추가" -> "유효하지 않은 입력 테스트를 작성하고, 통과시켜라"
-- "버그 수정" -> "버그를 재현하는 테스트를 작성하고, 통과시켜라"
-- "리팩터링" -> "전후 테스트가 모두 통과해야 한다"
-
-다단계 작업 시 간단한 계획을 먼저 제시:
-```
-1. [단계] -> 검증: [확인 방법]
-2. [단계] -> 검증: [확인 방법]
-3. [단계] -> 검증: [확인 방법]
-```
+Coding behavior principles for a full-stack + AI multi-project environment.
+Merge with per-project CLAUDE.md files as needed.
 
 ---
 
-## 스택별 추가 규칙
+## 1. Think Before Coding
 
-### 프론트엔드 (React / Next.js / Vue)
-- 컴포넌트는 단일 책임. 하나가 너무 많이 하면 분리를 제안하라.
-- 클라이언트 상태와 서버 상태를 명확히 구분하라 (React Query / Zustand 등).
-- `any` 타입은 쓰지 마라. 모르겠으면 물어라.
-- CSS-in-JS vs Tailwind 등 스타일 방식은 기존 프로젝트 패턴을 따라라.
+**State assumptions explicitly. Don't hide confusion. Surface trade-offs.**
 
-### 백엔드 (Node / Python / FastAPI / Express)
-- API 경계에서만 입력 검증. 내부 함수는 신뢰해라.
-- SQL 쿼리는 파라미터 바인딩. 직접 문자열 조합 금지.
-- 환경 변수는 코드에 하드코딩하지 마라 — `.env` 또는 시크릿 매니저.
-- 비동기 코드는 일관되게 (async/await vs callback 혼용 금지).
+Before implementing:
+- If you have assumptions, state them. If uncertain, ask.
+- If there are multiple interpretations, present all of them — don't silently pick one.
+- If there's a simpler approach, mention it first.
+- If something is unclear, stop. Identify what's confusing and ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. No speculative code.**
+
+- Don't add features that weren't asked for.
+- Don't build abstraction layers for single-use code.
+- Don't add "flexibility" or "configurability" that wasn't requested.
+- Don't add error handling for scenarios that can't happen.
+- If you wrote 200 lines and it could be 50, rewrite it.
+
+A senior engineer looking at it shouldn't ask "why is this so complex?"
+
+## 3. Surgical Changes
+
+**Touch only what must be changed. Clean up only your own mess.**
+
+When modifying existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that work fine.
+- Match the existing style even if you'd do it differently.
+- If you find unrelated dead code, note it — don't delete it.
+
+Clean up what your changes orphan:
+- Remove imports/variables/functions that became unused due to your change.
+- Don't touch pre-existing dead code unless asked.
+
+Test: every changed line must trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Convert tasks into verifiable goals:
+- "add validation" → "write tests for invalid inputs, make them pass"
+- "fix bug" → "write a test that reproduces the bug, make it pass"
+- "refactor" → "tests must pass before and after"
+
+For multi-step tasks, present a simple plan first:
+```
+1. [step] → verify: [how to check]
+2. [step] → verify: [how to check]
+3. [step] → verify: [how to check]
+```
+
+---
+
+## Stack-Specific Rules
+
+### Frontend (React / Next.js / Vue)
+- Single responsibility per component. If one does too much, propose splitting.
+- Clearly separate client state and server state (React Query / Zustand, etc.).
+- Never use `any` type. If unsure, ask.
+- Follow the existing project's styling pattern (CSS-in-JS vs Tailwind, etc.).
+
+### Backend (Node / Python / FastAPI / Express)
+- Validate input only at system boundaries. Trust internal functions.
+- Always use parameter binding for SQL queries. Never concatenate strings.
+- Never hardcode environment variables — use `.env` or a secrets manager.
+- Be consistent with async code (don't mix async/await and callbacks).
 
 ### AI / ML
-- 프롬프트는 버전 관리해라 (파일로 분리, 날짜 태그 권장).
-- LLM 호출 비용 추정은 항상 같이 언급해라 (토큰 수, 모델 선택 근거).
-- 모델 응답은 신뢰하지 마라 — 파싱 실패 처리를 반드시 넣어라.
-- RAG 파이프라인: chunking -> embedding -> retrieval -> generation 각 단계를 분리해서 테스트 가능하게 만들어라.
-- Claude API 사용 시 prompt caching을 기본으로 적용하라.
+- Version-control prompts (separate files, date tags recommended).
+- Always mention LLM call cost estimates (token count, model selection rationale).
+- Never trust model output — always handle parse failures.
+- RAG pipeline: keep chunking → embedding → retrieval → generation stages separately testable.
+- Apply prompt caching by default when using the Claude API.
 
-### 공통
-- 시크릿, API 키, 개인정보는 절대 코드에 넣지 마라.
-- 공유 시스템(DB, 외부 API, CI/CD)에 영향 가는 작업은 실행 전에 먼저 확인하라.
-- 테스트 없이 "동작한다"고 주장하지 마라.
-
----
-
-## 응답 스타일
-
-- 한국어로 대화해도 괜찮다.
-- 짧고 명확하게. 설명이 길어질 땐 요점 먼저, 세부사항 나중.
-- 파일 경로와 라인 번호를 함께 참조하라 (`path/to/file.ts:42`).
-- 코드 블록에는 언어 태그를 붙여라.
-- 작업 완료 후 요약은 1-2문장으로만.
+### General
+- Never put secrets, API keys, or personal data in code.
+- Confirm before taking actions that affect shared systems (DB, external APIs, CI/CD).
+- Never claim something "works" without tests.
 
 ---
 
-**이 가이드라인이 잘 작동하고 있다면:** diff에 불필요한 변경이 없고, 과도한 추상화로 인한 재작성이 없고, 실수 후가 아닌 구현 전에 명확화 질문이 온다.
+## Response Style
+
+- Korean is fine.
+- Short and clear. For longer explanations: key point first, details after.
+- Reference file paths and line numbers (`path/to/file.ts:42`).
+- Always add language tags to code blocks.
+- End-of-task summary: 1–2 sentences max.
+
+---
+
+**This is working well when:** diffs have no unnecessary changes, no rewrites due to over-abstraction, and clarifying questions come before implementation rather than after mistakes.

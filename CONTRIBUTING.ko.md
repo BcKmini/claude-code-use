@@ -1,0 +1,97 @@
+**한국어** · **[English](CONTRIBUTING.md)**
+
+# 기여 가이드
+
+이 프로젝트를 개선하는 데 도움을 주셔서 감사합니다!
+
+---
+
+## 기여 방법
+
+| 유형 | 방법 |
+|------|------|
+| 버그 수정 | Bug Report 이슈 열기 → 수정 후 PR |
+| 새 스니펫 | `snippets/defaults.json` 에 추가 → PR |
+| 새 에이전트 | `agents/` 에 `.md` 파일 추가 → README 테이블 업데이트 → PR |
+| 문서 개선 | `.md` 파일 수정 → PR |
+| 번역 개선 | `README.md` (EN) 또는 `README.ko.md` (KO) 개선 |
+| 기능 아이디어 | Feature Request 이슈 먼저 열기 |
+
+---
+
+## 개발 환경 설정
+
+```bash
+git clone https://github.com/BcKmini/Claudecode-Agent.git
+cd Claudecode-Agent
+python --version   # 3.8+ 필요
+```
+
+`snippet.py`는 Python 표준 라이브러리만 사용 — `pip install` 불필요.
+
+---
+
+## 새 스니펫 추가
+
+1. `snippets/defaults.json` 열기
+2. 기존 형식에 맞게 항목 추가:
+
+```json
+"my-snippet": {
+  "prompt": "프롬프트 내용. {{VARIABLE}} 으로 템플릿 변수 사용 가능.",
+  "tags": ["tag1", "tag2"],
+  "created": "YYYY-MM-DD",
+  "uses": 0
+}
+```
+
+3. 로컬에서 테스트:
+```bash
+python tools/snippet.py import snippets/defaults.json --overwrite
+python tools/snippet.py show my-snippet
+python tools/snippet.py run my-snippet --dry-run
+```
+
+4. `README.md` 와 `README.ko.md` 의 스니펫 테이블 업데이트
+
+---
+
+## 새 에이전트 추가
+
+1. 기존 에이전트 파일 형식을 참고해 `agents/NN-agent-name.md` 생성
+2. `README.md` 와 `README.ko.md` 의 에이전트 테이블에 행 추가
+3. `SETUP.md` 와 `SETUP.ko.md` 의 테이블도 업데이트
+4. 에이전트 이름을 하드코딩하는 경우 설치 스크립트(`setup-agents.ps1`, `setup-agents.sh`) 업데이트
+
+---
+
+## 코드 스타일 (Python 도구)
+
+- 표준 라이브러리만 사용 — 외부 의존성 없음
+- Python 3.8+ 호환 (walrus 연산자 `:=`, `match` 사용 금지)
+- 사용자에게 보이는 문자열은 모두 영어 (한국어는 주석에만)
+- `NO_COLOR` 환경변수 반드시 준수
+- 종료 코드: `0` 성공, `1` 찾을 수 없음 / 이미 존재, `2` 사용법 오류
+
+### Rust 기여 (claude-tools)
+
+- `cargo check` 에러 없어야 함
+- `cargo clippy` 경고 최소화
+- 새 서브커맨드는 기존 `snippet.rs` / `handoff.rs` / `cost.rs` 패턴 따르기
+
+---
+
+## Pull Request 체크리스트
+
+- [ ] `python tools/snippet.py --help` 정상 작동
+- [ ] 기존 명령어 모두 정상 작동
+- [ ] `snippet import snippets/defaults.json` 정상 작동
+- [ ] 새 스니펫·에이전트 추가 시 README 테이블 업데이트됨
+- [ ] 외부 의존성 새로 추가하지 않음
+- [ ] EN/KO 문서 쌍 모두 업데이트됨 (해당하는 경우)
+
+---
+
+## 라이선스
+
+기여하면 [MIT 라이선스](LICENSE) 하에 배포된다는 것에 동의하는 것으로 간주합니다.
