@@ -1,136 +1,232 @@
+<div align="center">
+
+<img src="assets/claude.png" alt="Claude Code Multi-Agent" width="420">
+
 # Claude Code Multi-Agent System
-<div align="center">
-<img src="https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic" />
-<img src="https://img.shields.io/badge/Agents-9-green?style=flat-square" />
-<img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey?style=flat-square" />
-<img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
+
+**9 specialized AI agents + a personal prompt manager, all for Claude Code**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/claude-code-multi-agent)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
+[![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#agent-roster)
+
+**[한국어 README](README.ko.md)** · **[Setup Guide](SETUP.md)** · **[Cheatsheet](AGENT-CHEATSHEET.md)** · **[claw-code Integration](INTEGRATION.md)**
+
 </div>
 
-<div align="center">
-  <img src="assets/claude.png" alt="Claude" width="500">
-</div>
-
-
 ---
 
-## 문서 목록
+## What is this?
 
-| 문서 | 내용 |
-|------|------|
-| [README](./README.md) | 프로젝트 소개 및 빠른 시작 (현재 페이지) |
-| [SETUP.md](./SETUP.md) | 전체 환경 세팅 (MCP, Docker, 플러그인, 환경변수) |
-| [AGENT-CHEATSHEET.md](./AGENT-CHEATSHEET.md) | 상황별 프롬프트 모음 및 빠른 참조 |
-| [INTEGRATION.md](./INTEGRATION.md) | claw-code 연동 가이드 |
-| [CLAUDE.md](./CLAUDE.md) | 개인 개발 원칙 및 코딩 가이드라인 |
+A drop-in enhancement for **Claude Code** that gives you:
 
----
+1. **9 specialized sub-agents** — each laser-focused on one job (design, code, review, test, security…)
+2. **`snippet`** — a personal prompt manager so your best prompts are never more than one command away
 
-## 왜 멀티 에이전트인가
-
-단일 Claude 인스턴스는 만능이지만, 역할이 섞이면 집중력이 분산된다.
+Instead of one Claude instance doing everything, each task is routed to the agent best suited for it.
 
 ```
-[일반 방식]
-"로그인 기능 만들어줘" -> Claude 혼자 설계 + 구현 + 리뷰 + 테스트
-
-[멀티 에이전트 방식]
-orchestrator -> planner(설계) -> implementer(구현) -> reviewer(리뷰) -> tester(테스트)
+You                     Orchestrator
+ │                           │
+ └──► "Add OAuth login" ──► ├──► planner       (architecture)
+                             ├──► database-expert (schema)
+                             ├──► implementer   (code)
+                             ├──► reviewer      (code review)
+                             └──► tester        (tests)
 ```
 
-**장점**
-- 각 에이전트가 자기 역할에만 집중 — 컨텍스트 오염 없음
-- 병렬 실행으로 시간 단축 (planner + security-auditor 동시 실행 가능)
-- 모델별 비용 최적화 (단순 작업엔 Haiku, 중요 판단엔 Opus)
-- reviewer가 implementer 결과를 독립적으로 검증
+---
+
+## Agent Roster
+
+| # | Agent | Model | Job |
+|---|-------|-------|-----|
+| 00 | **orchestrator** | Opus | Breaks down requests and delegates to sub-agents |
+| 01 | **planner** | Opus | Architecture & design decisions — read-only |
+| 02 | **implementer** | Sonnet | Writes and edits code |
+| 03 | **reviewer** | Sonnet | Bug, security, quality, performance review — read-only |
+| 04 | **tester** | Sonnet | Unit, integration, E2E test authoring |
+| 05 | **security-auditor** | Opus | OWASP Top 10 audit — read-only |
+| 06 | **performance-optimizer** | Sonnet | Bottleneck analysis and optimization |
+| 07 | **database-expert** | Sonnet | Schema design, queries, migrations |
+| 08 | **documenter** | Haiku | README, API docs, inline comments |
+
+> **Why separate agents?**  
+> Each agent carries only the context relevant to its role. No contamination between "design mode" and "implementation mode." Parallel execution (planner + security-auditor simultaneously) cuts wall-clock time.
 
 ---
 
-## 에이전트 구성
+## Quick Start
 
-| # | 에이전트 | 모델 | 역할 |
-|---|---------|------|------|
-| 00 | orchestrator | Opus | 총괄 지휘, 작업 분해 및 위임 |
-| 01 | planner | Opus | 설계·아키텍처 수립 (읽기 전용) |
-| 02 | implementer | Sonnet | 실제 코드 작성·수정 |
-| 03 | reviewer | Sonnet | 버그·보안·품질·성능 리뷰 (읽기 전용) |
-| 04 | tester | Sonnet | 유닛·통합·E2E 테스트 작성 |
-| 05 | security-auditor | Opus | OWASP Top 10 기준 보안 감사 |
-| 06 | performance-optimizer | Sonnet | 성능 병목 분석 및 최적화 |
-| 07 | database-expert | Sonnet | DB 스키마·쿼리·마이그레이션 |
-| 08 | documenter | Haiku | README·API 문서·주석 작성 |
+### 1. Install Claude Code
 
----
+```bash
+npm install -g @anthropic-ai/claude-code
+claude   # authenticate on first run
+```
 
-## 빠른 시작
-
-### Windows
+### 2. Install the agents
 
 ```powershell
+# Windows
 git clone https://github.com/BcKmini/claude-code-multi-agent.git
 cd claude-code-multi-agent
 powershell -ExecutionPolicy Bypass -File setup-agents.ps1
 ```
 
-### Mac / Linux
-
 ```bash
+# macOS / Linux
 git clone https://github.com/BcKmini/claude-code-multi-agent.git
 cd claude-code-multi-agent
 bash setup-agents.sh
 ```
 
-스크립트가 자동으로:
-- `~/.claude/agents/`에 에이전트 파일 복사
-- `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 환경변수 영구 설정 (zsh/bash 자동 감지)
-- `.claudeignore` 생성
+### 3. Verify
 
-### 설치 확인
-
-Claude Code 실행 후:
 ```
-/agents
+claude
+/agents          # → 9 agents listed
 ```
-9개 에이전트가 목록에 표시되면 완료.
-
-> 전체 환경 세팅 (MCP 서버, Docker, 플러그인 등)은 [SETUP.md](./SETUP.md)를 참고.
 
 ---
 
-## 사용 예시
+## Using the Agents
 
-### 새 기능 전체 파이프라인
+### Full feature pipeline
+
 ```
 Use the orchestrator to implement OAuth 2.0 login with Google.
 Requirements:
-- JWT 토큰 발급
-- 기존 이메일 로그인과 연동
+- JWT token issuance
+- Integrate with existing email login
+
 Run the full pipeline: planner -> implementer -> reviewer -> tester
 ```
 
-### 코드 리뷰
+### Quick review
+
 ```
 Have the reviewer subagent review src/api/auth.ts
 Focus on security vulnerabilities and error handling.
 ```
 
-### 병렬 실행
+### Parallel tasks (saves time)
+
 ```
 Run these in parallel:
 1. Have planner design the notification module
 2. Have database-expert design the schema
-3. Have security-auditor review requirements
+3. Have security-auditor review the requirements
 Then have implementer execute the combined plan.
 ```
 
-> 더 많은 프롬프트 예시는 [AGENT-CHEATSHEET.md](./AGENT-CHEATSHEET.md)를 참고.
+> See [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) for 20+ ready-to-use prompts.
 
 ---
 
-## 파일 구조
+## snippet — Personal Prompt Manager
+
+`snippet` saves your best Claude prompts by name — and brings them back in one command from the terminal or inside a Claude Code session.
+
+### Install snippet
+
+```powershell
+# Windows
+powershell -ExecutionPolicy Bypass -File tools\install-snippet.ps1
+```
+
+```bash
+# macOS / Linux
+bash tools/install-snippet.sh
+```
+
+Installs:
+- `~/.claude/commands/snippet.md` → activates `/snippet` slash command inside Claude Code
+- Imports 20 built-in snippets from `snippets/defaults.json`
+- Registers the `snippet` shell function in your profile
+
+### Terminal usage
+
+```bash
+snippet list                        # all snippets
+snippet list --tag pipeline         # filter by tag
+snippet list --sort-by uses         # sort by most-used
+
+snippet save myfix "Fix {{BUG}} in {{FILE}}" --tags bug
+snippet run myfix --var BUG="null ref" --var FILE="auth.ts"
+snippet run full-pipeline | claude  # pipe directly to Claude
+
+snippet search security
+snippet show code-review
+snippet edit code-review            # open in $EDITOR
+snippet cp code-review my-review    # copy a snippet
+snippet delete my-review            # delete (prompts confirmation)
+snippet stats                       # usage statistics
+
+snippet import snippets/defaults.json          # import from file
+snippet export my-backup.json                  # export all
+snippet export my-backup.json --tag pipeline   # export by tag
+```
+
+### Inside Claude Code
+
+```
+/snippet list
+/snippet run full-pipeline
+/snippet search security
+/snippet show db-schema
+```
+
+### Template variables
+
+Any `{{VARIABLE}}` in a prompt becomes a fill-in-the-blank at run time:
+
+```bash
+# Prompt stored as:
+# "Use orchestrator to implement {{FEATURE}} in {{LANG}}. Requirements: {{REQUIREMENTS}}"
+
+snippet run new-feature \
+  --var FEATURE="user notifications" \
+  --var LANG="TypeScript" \
+  --var REQUIREMENTS="real-time push, email digest"
+```
+
+> Preview without running: add `--dry-run`
+
+### Built-in snippets (20)
+
+| Name | Tags | Purpose |
+|------|------|---------|
+| `full-pipeline` | pipeline | Full orchestrator pipeline with template vars |
+| `new-feature` | pipeline, feature | Design + implement from scratch |
+| `fix-bug` | bug | Fix + regression test |
+| `hotfix` | bug, urgent | Emergency production fix |
+| `code-review` | review | File-level code review |
+| `pr-review` | review, pr | Diff review before merge |
+| `security-audit` | security | OWASP Top 10 audit |
+| `parallel-design` | parallel | Design, schema, security in parallel |
+| `db-schema` | database | Schema + index strategy + migration |
+| `db-migrate` | database, migration | Migration with rollback plan |
+| `performance` | performance | Bottleneck analysis |
+| `write-tests` | test | Comprehensive test suite |
+| `write-docs` | docs | README + JSDoc update |
+| `refactor` | refactor | Safe refactor with test verification |
+| `explain` | explain | Explain unfamiliar code |
+| `api-review` | review, api | REST API design review |
+| `nextjs-feature` | nextjs, frontend | Next.js 15 App Router feature |
+| `fastapi-endpoint` | fastapi, backend | FastAPI endpoint with tests |
+| `context-reset` | meta | Compact context + list next steps |
+| `cost-check` | meta | Session cost estimate |
+
+---
+
+## Repository Layout
 
 ```
 claude-code-multi-agent/
-├── agents/
+├── agents/                   ← agent definitions (copied to ~/.claude/agents/)
 │   ├── 00-orchestrator.md
 │   ├── 01-planner.md
 │   ├── 02-implementer.md
@@ -140,77 +236,94 @@ claude-code-multi-agent/
 │   ├── 06-performance-optimizer.md
 │   ├── 07-database-expert.md
 │   └── 08-documenter.md
-├── AGENT-CHEATSHEET.md   <- 상황별 프롬프트 모음
-├── CLAUDE.md             <- 개발 원칙 가이드라인
-├── INTEGRATION.md        <- claw-code 연동 가이드
-├── SETUP.md              <- 전체 환경 세팅
-├── setup-agents.ps1      <- Windows 설치 스크립트
-├── setup-agents.sh       <- Mac/Linux 설치 스크립트
-└── README.md
+├── .claude/
+│   └── commands/
+│       └── snippet.md        ← /snippet slash command definition
+├── snippets/
+│   └── defaults.json         ← 20 built-in prompt templates
+├── tools/
+│   ├── snippet.py            ← prompt manager CLI (Python 3.8+, stdlib only)
+│   ├── install-snippet.ps1   ← Windows installer
+│   └── install-snippet.sh    ← macOS / Linux installer
+├── AGENT-CHEATSHEET.md       ← ready-to-use prompt examples
+├── CLAUDE.md                 ← personal coding guidelines
+├── INTEGRATION.md            ← claw-code integration guide
+├── SETUP.md                  ← full environment setup
+├── setup-agents.ps1          ← Windows agent installer
+└── setup-agents.sh           ← macOS / Linux agent installer
 ```
-
-### 에이전트 설치 경로
-
-| 위치 | 적용 범위 |
-|------|-----------|
-| `~/.claude/agents/` | 글로벌 — 모든 프로젝트에서 사용 |
-| `.claude/agents/` (프로젝트 루트) | 로컬 — 해당 프로젝트에서만 사용 |
 
 ---
 
-## 고급 사용법
+## Full Documentation
 
-### CLAUDE.md로 에이전트 동작 제어
-
-프로젝트 루트에 `CLAUDE.md` 배치 시 Claude가 자동으로 읽는다.
-
-```markdown
-## 에이전트 시스템
-복잡한 요청 -> orchestrator에게 먼저 위임하세요.
-
-## 절대 수정 금지
-- src/generated/
-- .env.production
-```
-
-> 개발 원칙 전체는 [CLAUDE.md](./CLAUDE.md) 참고.
-
-### 컨텍스트 비용 관리
-
-| 상황 | 명령 |
-|------|------|
-| 단계 완료 후 | `/compact` |
-| 완전히 다른 작업 시작 | `/clear` |
-| 특정 파일만 참조 | `@src/auth/login.ts 리뷰해줘` |
-| 비용 확인 | `/cost` |
+| Document | Contents |
+|----------|----------|
+| [SETUP.md](SETUP.md) | Complete env setup: MCP servers, Docker, plugins, env vars |
+| [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | 20+ copy-paste-ready prompts |
+| [INTEGRATION.md](INTEGRATION.md) | claw-code (Rust CLI harness) integration |
+| [CLAUDE.md](CLAUDE.md) | Coding principles and response style guidelines |
 
 ---
 
-## 트러블슈팅
+## Context Cost Tips
 
-**에이전트가 `/agents`에 안 보임**
-- `~/.claude/agents/`에 `.md` 파일이 있는지 확인
-- 파일 인코딩이 UTF-8인지 확인
-- Claude Code 재시작
+| Situation | Command |
+|-----------|---------|
+| After finishing a step | `/compact` |
+| Switching to a completely different task | `/clear` |
+| Reference a specific file | `@src/auth.ts review this` |
+| Check spend | `/cost` |
 
-**Agent Teams가 작동 안 함**
+---
+
+## Troubleshooting
+
+**Agents not showing in `/agents`**
 ```bash
-# Mac/Linux
-echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
-# "1" 이 출력되어야 함
+ls ~/.claude/agents/*.md   # files must be present
+# Restart Claude Code
 ```
+
+**Agent Teams not working**
 ```powershell
 # Windows
-[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS", "User")
+[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS","User")
+# Should print: 1
+```
+```bash
+# macOS / Linux
+echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS   # should print 1
 ```
 
-**컨텍스트가 너무 커질 때**
+**MCP connection error (-32000)**
+```bash
+docker ps   # verify GitHub MCP container is running
+# Then inside Claude Code:
+/mcp        # reconnect
 ```
-/compact "다음 단계는 테스트 작성"
-```
+
+---
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
+- **New agent idea?** → open a [Feature Request](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=feature_request.md)
+- **Bug?** → open a [Bug Report](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=bug_report.md)
+- **New snippet idea?** → add it to `snippets/defaults.json` and send a PR
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)
+
+---
+
+<div align="center">
+
+Made for developers who want Claude Code at its best.  
+If this saved you time, a ⭐ star helps others find it.
+
+</div>
