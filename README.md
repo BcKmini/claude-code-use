@@ -4,13 +4,15 @@
 
 # Claude Code Multi-Agent System
 
-**9 specialized AI agents + a personal prompt manager, all for Claude Code**
+**9 specialized AI agents + 3 productivity tools — all for Claude Code**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/claude-code-multi-agent)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#agent-roster)
+[![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#tools)
 
 **[한국어 README](README.ko.md)** · **[Setup Guide](SETUP.md)** · **[Cheatsheet](AGENT-CHEATSHEET.md)** · **[claw-code Integration](INTEGRATION.md)**
 
@@ -23,7 +25,11 @@
 A drop-in enhancement for **Claude Code** that gives you:
 
 1. **9 specialized sub-agents** — each laser-focused on one job (design, code, review, test, security…)
-2. **`snippet`** — a personal prompt manager so your best prompts are never more than one command away
+2. **`snippet`** — personal prompt manager; your best prompts one command away
+3. **`claude-handoff`** — save full session context and resume it in the next conversation
+4. **`claude-cost`** — estimate and track Claude API spend before you run a prompt
+
+All three tools ship as Python CLIs, as Claude Code slash commands (`/snippet`, `/handoff`, `/cost`), and as a single compiled **Rust binary** (`claude-tools`).
 
 Instead of one Claude instance doing everything, each task is routed to the agent best suited for it.
 
@@ -126,51 +132,54 @@ Then have implementer execute the combined plan.
 
 ---
 
-## snippet — Personal Prompt Manager
+## Tools
 
-`snippet` saves your best Claude prompts by name — and brings them back in one command from the terminal or inside a Claude Code session.
+Three productivity tools that fill the gaps Claude Code doesn't cover out of the box.
 
-### Install snippet
+### Install all tools (one command)
 
 ```powershell
 # Windows
-powershell -ExecutionPolicy Bypass -File tools\install-snippet.ps1
+powershell -ExecutionPolicy Bypass -File tools\install-tools.ps1
 ```
 
 ```bash
 # macOS / Linux
-bash tools/install-snippet.sh
+bash tools/install-tools.sh
 ```
 
 Installs:
-- `~/.claude/commands/snippet.md` → activates `/snippet` slash command inside Claude Code
-- Imports 20 built-in snippets from `snippets/defaults.json`
-- Registers the `snippet` shell function in your profile
+- Slash commands `/snippet`, `/handoff`, `/cost` into `~/.claude/commands/`
+- 20 built-in snippets from `snippets/defaults.json`
+- Shell functions `snippet`, `claude-handoff`, `claude-cost` in your profile
 
-### Terminal usage
+> Or use the compiled Rust binary — see [Rust binary](#rust-binary-claude-tools) below.
+
+---
+
+### Tool 1 — `snippet` — Personal Prompt Manager
+
+Save your best Claude prompts by name and recall them in one command, from the terminal or inside Claude Code.
+
+**Terminal**
 
 ```bash
-snippet list                        # all snippets
-snippet list --tag pipeline         # filter by tag
-snippet list --sort-by uses         # sort by most-used
-
+snippet list                          # all snippets
+snippet list --tag pipeline           # filter by tag
 snippet save myfix "Fix {{BUG}} in {{FILE}}" --tags bug
 snippet run myfix --var BUG="null ref" --var FILE="auth.ts"
-snippet run full-pipeline | claude  # pipe directly to Claude
+snippet run full-pipeline | claude    # pipe directly to Claude
 
 snippet search security
 snippet show code-review
-snippet edit code-review            # open in $EDITOR
-snippet cp code-review my-review    # copy a snippet
-snippet delete my-review            # delete (prompts confirmation)
-snippet stats                       # usage statistics
-
-snippet import snippets/defaults.json          # import from file
-snippet export my-backup.json                  # export all
-snippet export my-backup.json --tag pipeline   # export by tag
+snippet cp code-review my-review
+snippet delete my-review --force
+snippet stats
+snippet export my-backup.json
+snippet import snippets/defaults.json
 ```
 
-### Inside Claude Code
+**Inside Claude Code**
 
 ```
 /snippet list
@@ -179,23 +188,16 @@ snippet export my-backup.json --tag pipeline   # export by tag
 /snippet show db-schema
 ```
 
-### Template variables
-
-Any `{{VARIABLE}}` in a prompt becomes a fill-in-the-blank at run time:
+**Template variables** — any `{{VARIABLE}}` becomes a fill-in-the-blank:
 
 ```bash
-# Prompt stored as:
-# "Use orchestrator to implement {{FEATURE}} in {{LANG}}. Requirements: {{REQUIREMENTS}}"
-
 snippet run new-feature \
   --var FEATURE="user notifications" \
   --var LANG="TypeScript" \
   --var REQUIREMENTS="real-time push, email digest"
 ```
 
-> Preview without running: add `--dry-run`
-
-### Built-in snippets (20)
+**Built-in snippets (20)**
 
 | Name | Tags | Purpose |
 |------|------|---------|
@@ -222,11 +224,127 @@ snippet run new-feature \
 
 ---
 
+### Tool 2 — `claude-handoff` — Session Continuity
+
+Save the full context of a Claude Code session (git state, open tasks, a summary note) to a markdown file. Load it back in the next session — no more "what were we doing again?"
+
+**Terminal**
+
+```bash
+claude-handoff save                    # prompts for a note, saves context
+claude-handoff save --note "finished auth, next: write tests"
+claude-handoff load | claude           # load most recent handoff into Claude
+claude-handoff list                    # list saved handoffs
+claude-handoff show --id 20250101-120000
+claude-handoff clean --days 30 --force # delete old handoffs
+```
+
+**Inside Claude Code**
+
+```
+/handoff save
+/handoff load
+/handoff list
+```
+
+**What a handoff captures:**
+
+- Current git branch, last 5 commits, working-tree status, diff stat
+- Remote URL and repo root
+- Contents of `TODO.md` / `TASKS.md` if present
+- Your summary note
+- A ready-to-paste **Resume Prompt** for the next session
+
+**Resume workflow:**
+
+```bash
+# End of session
+claude-handoff save --note "Completed OAuth flow; next: email verification"
+
+# Start of next session
+claude-handoff load | claude
+```
+
+---
+
+### Tool 3 — `claude-cost` — Cost Estimator & Tracker
+
+Know what a prompt will cost before you run it. Track actual spend from session logs. Set a monthly budget.
+
+**Terminal**
+
+```bash
+# Estimate cost for a snippet across all 9 agents
+claude-cost estimate --snippet full-pipeline --agents 9
+
+# Estimate any prompt text
+claude-cost estimate "Refactor the entire auth module"
+
+# Cost history for the last 7 days
+claude-cost history
+
+# Monthly summary
+claude-cost month
+
+# Per-agent breakdown
+claude-cost agents
+
+# Set a monthly budget (shows % used in estimates)
+claude-cost set-budget 20.00
+```
+
+**Inside Claude Code**
+
+```
+/cost estimate full-pipeline
+/cost history
+/cost month
+/cost agents
+```
+
+**Model pricing used**
+
+| Model | Input (per 1M) | Output (per 1M) |
+|-------|---------------|-----------------|
+| Opus | $15.00 | $75.00 |
+| Sonnet | $3.00 | $15.00 |
+| Haiku | $0.25 | $1.25 |
+
+---
+
+### Rust binary — `claude-tools`
+
+All three tools compiled into one zero-dependency binary — no Python required.
+
+```bash
+cd rust
+cargo build --release
+
+# Use
+./target/release/claude-tools snippet list
+./target/release/claude-tools handoff save --note "done"
+./target/release/claude-tools cost estimate --snippet full-pipeline
+```
+
+**Or install globally:**
+
+```bash
+cargo install --path rust/claude-tools
+
+claude-tools snippet list
+claude-tools handoff load | claude
+claude-tools cost month
+```
+
+> See [INTEGRATION.md](INTEGRATION.md) for how `claude-tools` connects with **claw-code**, the Rust-based Claude CLI harness.
+
+---
+
 ## Repository Layout
 
 ```
-claude-code-multi-agent/
-├── agents/                   ← agent definitions (copied to ~/.claude/agents/)
+Claudecode-Agent/
+├── agents/                       ← agent definitions (copied to ~/.claude/agents/)
 │   ├── 00-orchestrator.md
 │   ├── 01-planner.md
 │   ├── 02-implementer.md
@@ -238,19 +356,33 @@ claude-code-multi-agent/
 │   └── 08-documenter.md
 ├── .claude/
 │   └── commands/
-│       └── snippet.md        ← /snippet slash command definition
+│       ├── snippet.md            ← /snippet slash command
+│       ├── handoff.md            ← /handoff slash command
+│       └── cost.md               ← /cost slash command
 ├── snippets/
-│   └── defaults.json         ← 20 built-in prompt templates
+│   └── defaults.json             ← 20 built-in prompt templates
 ├── tools/
-│   ├── snippet.py            ← prompt manager CLI (Python 3.8+, stdlib only)
-│   ├── install-snippet.ps1   ← Windows installer
-│   └── install-snippet.sh    ← macOS / Linux installer
-├── AGENT-CHEATSHEET.md       ← ready-to-use prompt examples
-├── CLAUDE.md                 ← personal coding guidelines
-├── INTEGRATION.md            ← claw-code integration guide
-├── SETUP.md                  ← full environment setup
-├── setup-agents.ps1          ← Windows agent installer
-└── setup-agents.sh           ← macOS / Linux agent installer
+│   ├── snippet.py                ← prompt manager CLI (Python 3.8+, stdlib only)
+│   ├── claude-handoff.py         ← session continuity CLI
+│   ├── claude-cost.py            ← cost estimator CLI
+│   ├── install-tools.ps1         ← Windows one-shot installer (all 3 tools)
+│   └── install-tools.sh          ← macOS / Linux one-shot installer
+├── rust/
+│   ├── Cargo.toml                ← workspace root
+│   └── claude-tools/             ← Rust binary (snippet + handoff + cost)
+│       ├── Cargo.toml
+│       └── src/
+│           ├── main.rs
+│           ├── snippet.rs
+│           ├── handoff.rs
+│           ├── cost.rs
+│           └── colors.rs
+├── AGENT-CHEATSHEET.md           ← ready-to-use prompt examples
+├── CLAUDE.md                     ← personal coding guidelines
+├── INTEGRATION.md                ← claw-code + Rust integration guide
+├── SETUP.md                      ← full environment setup
+├── setup-agents.ps1              ← Windows agent installer
+└── setup-agents.sh               ← macOS / Linux agent installer
 ```
 
 ---
@@ -261,8 +393,9 @@ claude-code-multi-agent/
 |----------|----------|
 | [SETUP.md](SETUP.md) | Complete env setup: MCP servers, Docker, plugins, env vars |
 | [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | 20+ copy-paste-ready prompts |
-| [INTEGRATION.md](INTEGRATION.md) | claw-code (Rust CLI harness) integration |
+| [INTEGRATION.md](INTEGRATION.md) | claw-code (Rust CLI harness) + `claude-tools` Rust binary |
 | [CLAUDE.md](CLAUDE.md) | Coding principles and response style guidelines |
+| [README.ko.md](README.ko.md) | Korean version of this README |
 
 ---
 
@@ -319,11 +452,3 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
 
 [MIT](LICENSE)
 
----
-
-<div align="center">
-
-Made for developers who want Claude Code at its best.  
-If this saved you time, a ⭐ star helps others find it.
-
-</div>
