@@ -1,0 +1,122 @@
+{
+  "full-pipeline": {
+    "prompt": "Use the orchestrator to implement {{FEATURE}}.\n\nRequirements:\n- {{REQUIREMENTS}}\n\nRun the full pipeline: planner -> implementer -> reviewer -> tester",
+    "tags": ["pipeline", "orchestrator"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "fix-bug": {
+    "prompt": "Use the orchestrator to fix the bug described below.\n\nBug: {{BUG_DESCRIPTION}}\nLocation: {{LOCATION}}\n\nAfter fixing:\n1. Have reviewer verify the fix\n2. Have tester add a regression test",
+    "tags": ["bug", "orchestrator"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "hotfix": {
+    "prompt": "URGENT: Production hotfix needed.\n\nIssue: {{ISSUE}}\nAffected file(s): {{FILES}}\n\nSteps:\n1. Have implementer apply the minimal fix\n2. Have reviewer do a fast security + correctness check\n3. Output a git commit message for the fix",
+    "tags": ["bug", "urgent"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "new-feature": {
+    "prompt": "Use the orchestrator to design and implement a new feature from scratch.\n\nFeature: {{FEATURE}}\nContext: {{CONTEXT}}\n\nPipeline:\n1. planner  — design architecture and API surface\n2. database-expert — design schema (if needed)\n3. implementer — write the code\n4. reviewer — review for bugs and security\n5. tester — write tests\n6. documenter — update README / JSDoc",
+    "tags": ["pipeline", "orchestrator", "feature"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "code-review": {
+    "prompt": "Have the reviewer subagent review the following file.\n\nFile: {{FILE}}\n\nFocus on:\n- Security vulnerabilities\n- Error handling\n- Code quality and maintainability\n\nReport findings by severity: Critical / High / Medium / Low",
+    "tags": ["review"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "pr-review": {
+    "prompt": "Review the current diff for correctness bugs and simplification opportunities.\n\nFocus:\n1. Logic errors or off-by-one mistakes\n2. Security issues (injection, auth bypass, etc.)\n3. Unnecessary complexity that can be simplified\n4. Missing error handling at system boundaries\n\nReport findings as: [Severity] file:line -- description -- suggested fix",
+    "tags": ["review", "pr"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "security-audit": {
+    "prompt": "Have security-auditor perform a full OWASP Top 10 audit.\n\nScope: {{SCOPE}}\n\nReport all findings grouped by:\n1. Severity (Critical / High / Medium / Low)\n2. OWASP category\n3. Recommended fix",
+    "tags": ["security", "audit"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "parallel-design": {
+    "prompt": "Run these tasks in parallel:\n1. Have planner design the {{MODULE}} architecture\n2. Have database-expert design the schema for {{FEATURE}}\n3. Have security-auditor review requirements for {{FEATURE}}\n\nThen have implementer execute the combined plan.",
+    "tags": ["pipeline", "parallel"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "db-schema": {
+    "prompt": "Have database-expert design the schema for the following feature.\n\nFeature: {{FEATURE}}\nRequirements:\n- {{REQUIREMENTS}}\n\nDeliver:\n1. Table definitions with column types and constraints\n2. Index strategy with reasoning\n3. Migration file (up + down)",
+    "tags": ["database", "schema"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "db-migrate": {
+    "prompt": "Have database-expert handle the following migration.\n\nChange: {{CHANGE}}\nTable(s): {{TABLES}}\n\nDeliver:\n1. Migration file (up + down)\n2. Data backfill strategy if needed\n3. Rollback plan\n4. Estimated impact on table size / query performance",
+    "tags": ["database", "migration"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "performance": {
+    "prompt": "Have performance-optimizer analyze the following.\n\nTarget: {{TARGET}}\nSymptom: {{SYMPTOM}}\n\nDeliver:\n1. Bottleneck analysis with evidence\n2. Concrete optimization steps in priority order\n3. Expected improvement estimate",
+    "tags": ["performance"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "write-tests": {
+    "prompt": "Have tester write comprehensive tests for the following.\n\nTarget: {{TARGET}}\nTest types: {{TEST_TYPES}}\n\nRequirements:\n- Cover happy path and edge cases\n- Include failure scenarios\n- Aim for >80% coverage on changed files",
+    "tags": ["test"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "write-docs": {
+    "prompt": "Have documenter update the documentation for the following.\n\nScope: {{SCOPE}}\n\nDeliver:\n- README section update\n- Inline JSDoc / docstring for public APIs\n- Usage examples\n- Clear enough for a new developer to onboard in 30 minutes",
+    "tags": ["docs"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "refactor": {
+    "prompt": "Use the orchestrator to refactor the following code.\n\nTarget: {{TARGET}}\nGoal: {{GOAL}}\n\nConstraints:\n- Do NOT change external behavior\n- All existing tests must pass after refactoring\n- Have reviewer verify before finalizing",
+    "tags": ["refactor", "orchestrator"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "explain": {
+    "prompt": "Explain the following code so that a developer unfamiliar with this codebase can understand it.\n\nFile / function: {{TARGET}}\n\nCover:\n1. What it does (purpose)\n2. How it works (key logic steps)\n3. Why it is written this way (design decisions)\n4. Any gotchas or non-obvious behavior",
+    "tags": ["explain"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "api-review": {
+    "prompt": "Have reviewer and security-auditor jointly review this API design.\n\nEndpoint(s): {{ENDPOINTS}}\n\nCheck for:\n1. RESTful consistency (methods, status codes, naming)\n2. Authentication and authorization\n3. Input validation and sanitization\n4. Rate limiting considerations\n5. Response shape and error format\n\nSuggest concrete improvements.",
+    "tags": ["review", "api", "security"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "nextjs-feature": {
+    "prompt": "Use the orchestrator to implement the following Next.js 15 App Router feature.\n\nFeature: {{FEATURE}}\nRoute: {{ROUTE}}\n\nRequirements:\n- Use Server Components where possible\n- Client Components only when needed (interactivity / browser APIs)\n- TypeScript, strict mode\n- Proper loading.tsx and error.tsx\n\nRun full pipeline: planner -> implementer -> reviewer -> tester",
+    "tags": ["pipeline", "nextjs", "frontend"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "fastapi-endpoint": {
+    "prompt": "Use the orchestrator to implement a FastAPI endpoint.\n\nEndpoint: {{METHOD}} {{PATH}}\nPurpose: {{PURPOSE}}\n\nRequirements:\n- Pydantic v2 models for request/response\n- Proper HTTP status codes\n- OpenAPI docs (auto-generated)\n- Unit tests with pytest + httpx\n\nRun full pipeline: planner -> implementer -> reviewer -> tester",
+    "tags": ["pipeline", "fastapi", "backend"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "context-reset": {
+    "prompt": "/compact \"Summarize completed work so far and clearly list the next steps.\"",
+    "tags": ["meta", "context"],
+    "created": "2026-06-05",
+    "uses": 0
+  },
+  "cost-check": {
+    "prompt": "/cost\n\nCheck the current session cost and give a brief estimate of additional cost for the remaining work.",
+    "tags": ["meta", "cost"],
+    "created": "2026-06-05",
+    "uses": 0
+  }
+}
