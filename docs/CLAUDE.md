@@ -1,4 +1,4 @@
-[← Back to README](./README.md)
+[← Back to README](../README.md)
 
 **[한국어](CLAUDE.ko.md)** · **English**
 
@@ -13,7 +13,6 @@ Merge with per-project CLAUDE.md files as needed.
 
 **State assumptions explicitly. Don't hide confusion. Surface trade-offs.**
 
-Before implementing:
 - If you have assumptions, state them. If uncertain, ask.
 - If there are multiple interpretations, present all of them — don't silently pick one.
 - If there's a simpler approach, mention it first.
@@ -29,13 +28,10 @@ Before implementing:
 - Don't add error handling for scenarios that can't happen.
 - If you wrote 200 lines and it could be 50, rewrite it.
 
-A senior engineer looking at it shouldn't ask "why is this so complex?"
-
 ## 3. Surgical Changes
 
 **Touch only what must be changed. Clean up only your own mess.**
 
-When modifying existing code:
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that work fine.
 - Match the existing style even if you'd do it differently.
@@ -44,8 +40,6 @@ When modifying existing code:
 Clean up what your changes orphan:
 - Remove imports/variables/functions that became unused due to your change.
 - Don't touch pre-existing dead code unless asked.
-
-Test: every changed line must trace directly to the user's request.
 
 ## 4. Goal-Driven Execution
 
@@ -68,14 +62,14 @@ For multi-step tasks, present a simple plan first:
 ## Stack-Specific Rules
 
 ### Frontend (React / Next.js / Vue)
-- Single responsibility per component. If one does too much, propose splitting.
+- Single responsibility per component.
 - Clearly separate client state and server state (React Query / Zustand, etc.).
 - Never use `any` type. If unsure, ask.
-- Follow the existing project's styling pattern (CSS-in-JS vs Tailwind, etc.).
+- Follow the existing project's styling pattern.
 
 ### Backend (Node / Python / FastAPI / Express)
 - Validate input only at system boundaries. Trust internal functions.
-- Always use parameter binding for SQL queries. Never concatenate strings.
+- Always use parameter binding for SQL queries.
 - Never hardcode environment variables — use `.env` or a secrets manager.
 - Be consistent with async code (don't mix async/await and callbacks).
 
@@ -96,10 +90,10 @@ For multi-step tasks, present a simple plan first:
 ## Response Style
 
 - Korean is fine.
-- Short and clear. For longer explanations: key point first, details after.
+- Short and clear. Key point first, details after.
 - Reference file paths and line numbers (`path/to/file.ts:42`).
 - Always add language tags to code blocks.
-- End-of-task summary: 1–2 sentences max.
+- End-of-task summary: 1-2 sentences max.
 
 ---
 

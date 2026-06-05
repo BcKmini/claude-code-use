@@ -14,7 +14,7 @@
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#에이전트-구성)
 [![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#도구)
 
-**[English README](README.md)** · **[환경 세팅](SETUP.ko.md)** · **[치트시트](AGENT-CHEATSHEET.ko.md)** · **[연동 가이드](INTEGRATION.ko.md)** · **[기여 가이드](CONTRIBUTING.ko.md)**
+**[English README](README.md)** · **[환경 세팅](docs/SETUP.ko.md)** · **[치트시트](docs/AGENT-CHEATSHEET.ko.md)** · **[연동 가이드](docs/INTEGRATION.ko.md)** · **[기여 가이드](docs/CONTRIBUTING.ko.md)**
 
 </div>
 
@@ -128,7 +128,7 @@ Run these in parallel:
 Then have implementer execute the combined plan.
 ```
 
-> 20개 이상의 바로 쓸 수 있는 프롬프트는 [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) 참고.
+> 20개 이상의 바로 쓸 수 있는 프롬프트는 [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) 참고.
 
 ---
 
@@ -313,7 +313,7 @@ claude-cost set-budget 20.00
 
 ### Rust 바이너리 — `claude-tools`
 
-세 가지 도구를 의존성 없는 단일 바이너리로 컴파일합니다 — Python 불필요.
+세 가지 도구 + 실시간 비용 모니터를 의존성 없는 단일 바이너리로 컴파일합니다 — Python 불필요.
 
 ```bash
 cd rust
@@ -323,6 +323,8 @@ cargo build --release
 ./target/release/claude-tools snippet list
 ./target/release/claude-tools handoff save --note "완료"
 ./target/release/claude-tools cost estimate --snippet full-pipeline
+./target/release/claude-tools watch              # 실시간 비용 모니터
+./target/release/claude-tools watch --interval 5 # 5초 간격
 ```
 
 **전역 설치:**
@@ -333,9 +335,10 @@ cargo install --path rust/claude-tools
 claude-tools snippet list
 claude-tools handoff load | claude
 claude-tools cost month
+claude-tools watch   # 실시간 토큰·비용 스트림
 ```
 
-> `claude-tools`와 claw-code 연동 방법은 [INTEGRATION.md](INTEGRATION.md) 참고.
+> `claude-tools`와 claw-code 연동 방법은 [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) 참고.
 
 ---
 
@@ -368,18 +371,26 @@ Claudecode-Agent/
 │   └── install-tools.sh          ← macOS / Linux 통합 설치 스크립트
 ├── rust/
 │   ├── Cargo.toml                ← workspace 루트
-│   └── claude-tools/             ← Rust 바이너리 (snippet + handoff + cost)
+│   └── claude-tools/             ← Rust 바이너리 (snippet + handoff + cost + watch)
 │       ├── Cargo.toml
 │       └── src/
 │           ├── main.rs
 │           ├── snippet.rs
 │           ├── handoff.rs
 │           ├── cost.rs
+│           ├── watch.rs          ← 실시간 비용 모니터 (신규)
 │           └── colors.rs
-├── AGENT-CHEATSHEET.md           ← 바로 쓸 수 있는 프롬프트 모음
-├── CLAUDE.md                     ← 개인 코딩 원칙 가이드라인
-├── INTEGRATION.md                ← claw-code + Rust 연동 가이드
-├── SETUP.md                      ← 전체 환경 세팅 (MCP, Docker, 플러그인 등)
+├── docs/
+│   ├── SETUP.md                  ← 전체 환경 세팅 (MCP, Docker, 플러그인 등)
+│   ├── SETUP.ko.md
+│   ├── AGENT-CHEATSHEET.md       ← 바로 쓸 수 있는 프롬프트 모음
+│   ├── AGENT-CHEATSHEET.ko.md
+│   ├── INTEGRATION.md            ← claw-code + Rust 연동 가이드
+│   ├── INTEGRATION.ko.md
+│   ├── CONTRIBUTING.md           ← 기여 가이드
+│   ├── CONTRIBUTING.ko.md
+│   ├── CLAUDE.md                 ← 개인 코딩 원칙 가이드라인
+│   └── CLAUDE.ko.md
 ├── setup-agents.ps1              ← Windows 에이전트 설치 스크립트
 └── setup-agents.sh               ← macOS / Linux 에이전트 설치 스크립트
 ```
@@ -390,11 +401,11 @@ Claudecode-Agent/
 
 | 문서 | 한국어 | English |
 |------|--------|---------|
-| 환경 세팅 가이드 | [SETUP.ko.md](SETUP.ko.md) | [SETUP.md](SETUP.md) |
-| 에이전트 치트시트 | [AGENT-CHEATSHEET.ko.md](AGENT-CHEATSHEET.ko.md) | [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) |
-| 통합 가이드 (claw-code + Rust) | [INTEGRATION.ko.md](INTEGRATION.ko.md) | [INTEGRATION.md](INTEGRATION.md) |
-| 기여 가이드 | [CONTRIBUTING.ko.md](CONTRIBUTING.ko.md) | [CONTRIBUTING.md](CONTRIBUTING.md) |
-| 코딩 가이드라인 | [CLAUDE.ko.md](CLAUDE.ko.md) | [CLAUDE.md](CLAUDE.md) |
+| 환경 세팅 가이드 | [SETUP.ko.md](docs/SETUP.ko.md) | [SETUP.md](docs/SETUP.md) |
+| 에이전트 치트시트 | [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) | [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) |
+| 통합 가이드 (claw-code + Rust) | [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) | [INTEGRATION.md](docs/INTEGRATION.md) |
+| 기여 가이드 | [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md) | [CONTRIBUTING.md](docs/CONTRIBUTING.md) |
+| 코딩 가이드라인 | [CLAUDE.ko.md](docs/CLAUDE.ko.md) | [CLAUDE.md](docs/CLAUDE.md) |
 | README | [README.ko.md](README.ko.md) | [README.md](README.md) |
 
 ---
@@ -407,6 +418,7 @@ Claudecode-Agent/
 | 완전히 다른 작업 시작 | `/clear` |
 | 특정 파일 참조 | `@src/auth.ts 이 파일 리뷰해줘` |
 | 비용 확인 | `/cost` |
+| 다른 터미널에서 실시간 비용 모니터링 | `claude-tools watch` |
 
 ---
 
@@ -440,10 +452,10 @@ docker ps   # GitHub MCP 컨테이너 실행 중인지 확인
 
 ## 기여하기
 
-기여는 언제나 환영합니다! 먼저 [CONTRIBUTING.md](CONTRIBUTING.md)를 읽어주세요.
+기여는 언제나 환영합니다! 먼저 [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md)를 읽어주세요.
 
-- **새 에이전트 아이디어** → [Feature Request](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=feature_request.md) 열기
-- **버그 발견** → [Bug Report](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=bug_report.md) 열기
+- **새 에이전트 아이디어** → [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md) 열기
+- **버그 발견** → [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md) 열기
 - **새 스니펫 아이디어** → `snippets/defaults.json`에 추가 후 PR 보내기
 
 ---

@@ -6,7 +6,7 @@ Thank you for helping improve this project!
 
 ---
 
-## Ways to contribute
+## Ways to Contribute
 
 | Type | How |
 |------|-----|
@@ -19,33 +19,41 @@ Thank you for helping improve this project!
 
 ---
 
-## Development setup
+## Development Setup
 
 ```bash
-git clone https://github.com/BcKmini/claude-code-multi-agent.git
-cd claude-code-multi-agent
+git clone https://github.com/BcKmini/Claudecode-Agent.git
+cd Claudecode-Agent
 python --version   # 3.8+ required
 ```
 
-`snippet.py` uses only the Python standard library — no `pip install` needed.
+`snippet.py`, `claude-handoff.py`, `claude-cost.py` use only the Python standard library — no `pip install` needed.
+
+For the Rust binary:
+
+```bash
+cd rust
+cargo check   # verify build
+cargo build --release
+```
 
 ---
 
-## Adding a new snippet
+## Adding a New Snippet
 
 1. Open `snippets/defaults.json`
-2. Add your entry following the existing format:
+2. Add your entry:
 
 ```json
 "my-snippet": {
-  "prompt": "Your prompt text here. Use {{VARIABLE}} for template vars.",
+  "prompt": "Your prompt here. Use {{VARIABLE}} for template vars.",
   "tags": ["tag1", "tag2"],
   "created": "YYYY-MM-DD",
   "uses": 0
 }
 ```
 
-3. Test it locally:
+3. Test locally:
 ```bash
 python tools/snippet.py import snippets/defaults.json --overwrite
 python tools/snippet.py show my-snippet
@@ -56,35 +64,42 @@ python tools/snippet.py run my-snippet --dry-run
 
 ---
 
-## Adding a new agent
+## Adding a New Agent
 
 1. Create `agents/NN-agent-name.md` following the format of existing agents
 2. Add a row to the agent table in `README.md` and `README.ko.md`
-3. Add a row to the table in `SETUP.md`
-4. Update both install scripts (`setup-agents.ps1`, `setup-agents.sh`) if they hardcode agent names
+3. Update both install scripts if they hardcode agent names
 
 ---
 
-## Code style (snippet.py)
+## Code Style
 
+### Python tools
 - Standard library only — no external dependencies
-- Python 3.8+ compatible (no walrus operator `:=` in loops, no `match`)
-- All user-visible strings in English (Korean kept to comments only)
-- `NO_COLOR` environment variable must be respected for color output
-- Exit codes: `0` success, `1` not found / already exists, `2` usage error
+- Python 3.8+ compatible
+- All user-visible strings in English
+- `NO_COLOR` environment variable must be respected
+- Exit codes: `0` success, `1` not found / exists, `2` usage error
+
+### Rust (claude-tools)
+- `cargo check` must pass with no errors
+- Minimize `cargo clippy` warnings
+- New subcommands follow the pattern of existing modules in `rust/claude-tools/src/`
 
 ---
 
-## Pull Request checklist
+## Pull Request Checklist
 
 - [ ] `python tools/snippet.py --help` still works
 - [ ] All existing commands still work
 - [ ] `snippet import snippets/defaults.json` still works
+- [ ] `cargo check` passes (Rust changes)
 - [ ] README tables updated if new snippets / agents added
+- [ ] Both EN and KO docs updated where applicable
 - [ ] No new external dependencies introduced
 
 ---
 
 ## License
 
-By contributing, you agree your contributions will be released under the [MIT License](LICENSE).
+By contributing, you agree your contributions will be released under the [MIT License](../LICENSE).

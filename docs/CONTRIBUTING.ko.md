@@ -27,7 +27,15 @@ cd Claudecode-Agent
 python --version   # 3.8+ 필요
 ```
 
-`snippet.py`는 Python 표준 라이브러리만 사용 — `pip install` 불필요.
+`snippet.py`, `claude-handoff.py`, `claude-cost.py`는 Python 표준 라이브러리만 사용 — `pip install` 불필요.
+
+Rust 바이너리:
+
+```bash
+cd rust
+cargo check   # 빌드 확인
+cargo build --release
+```
 
 ---
 
@@ -60,24 +68,23 @@ python tools/snippet.py run my-snippet --dry-run
 
 1. 기존 에이전트 파일 형식을 참고해 `agents/NN-agent-name.md` 생성
 2. `README.md` 와 `README.ko.md` 의 에이전트 테이블에 행 추가
-3. `SETUP.md` 와 `SETUP.ko.md` 의 테이블도 업데이트
-4. 에이전트 이름을 하드코딩하는 경우 설치 스크립트(`setup-agents.ps1`, `setup-agents.sh`) 업데이트
+3. 에이전트 이름을 하드코딩하는 경우 설치 스크립트 업데이트
 
 ---
 
-## 코드 스타일 (Python 도구)
+## 코드 스타일
 
+### Python 도구
 - 표준 라이브러리만 사용 — 외부 의존성 없음
-- Python 3.8+ 호환 (walrus 연산자 `:=`, `match` 사용 금지)
-- 사용자에게 보이는 문자열은 모두 영어 (한국어는 주석에만)
+- Python 3.8+ 호환
+- 사용자에게 보이는 문자열은 모두 영어
 - `NO_COLOR` 환경변수 반드시 준수
-- 종료 코드: `0` 성공, `1` 찾을 수 없음 / 이미 존재, `2` 사용법 오류
+- 종료 코드: `0` 성공, `1` 찾을 수 없음/이미 존재, `2` 사용법 오류
 
-### Rust 기여 (claude-tools)
-
+### Rust (claude-tools)
 - `cargo check` 에러 없어야 함
 - `cargo clippy` 경고 최소화
-- 새 서브커맨드는 기존 `snippet.rs` / `handoff.rs` / `cost.rs` 패턴 따르기
+- 새 서브커맨드는 `rust/claude-tools/src/` 기존 모듈 패턴 따르기
 
 ---
 
@@ -86,12 +93,13 @@ python tools/snippet.py run my-snippet --dry-run
 - [ ] `python tools/snippet.py --help` 정상 작동
 - [ ] 기존 명령어 모두 정상 작동
 - [ ] `snippet import snippets/defaults.json` 정상 작동
+- [ ] `cargo check` 통과 (Rust 변경 시)
 - [ ] 새 스니펫·에이전트 추가 시 README 테이블 업데이트됨
+- [ ] EN/KO 문서 쌍 모두 업데이트됨
 - [ ] 외부 의존성 새로 추가하지 않음
-- [ ] EN/KO 문서 쌍 모두 업데이트됨 (해당하는 경우)
 
 ---
 
 ## 라이선스
 
-기여하면 [MIT 라이선스](LICENSE) 하에 배포된다는 것에 동의하는 것으로 간주합니다.
+기여하면 [MIT 라이선스](../LICENSE) 하에 배포된다는 것에 동의하는 것으로 간주합니다.

@@ -1,4 +1,4 @@
-[← Back to README](./README.md)
+[← Back to README](../README.md)
 
 **[한국어](AGENT-CHEATSHEET.ko.md)** · **English**
 
@@ -11,8 +11,7 @@ Ready-to-use prompts for every situation. Copy and paste directly.
 ## Quick Start
 
 ```
-# List available agents
-/agents
+/agents   # list available agents
 
 # Full pipeline (most common)
 Use the orchestrator to [describe your task]
@@ -115,6 +114,7 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 | After finishing a step | `/compact` |
 | Starting a completely different task | `/clear` |
 | Check spend | `/cost` |
+| Live cost monitor | `claude-tools watch` |
 | Reference a specific file | `@src/auth/login.ts review this file` |
 
 ---
@@ -136,7 +136,7 @@ Haiku  -> documenter                                 (simple/repetitive, lowest 
 ```
 /agents
 ```
-Check that `.md` files exist in `.claude/agents/`.
+Check that `.md` files exist in `~/.claude/agents/`.
 
 **Agent going out of scope**
 ```

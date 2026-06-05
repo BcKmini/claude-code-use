@@ -14,7 +14,7 @@
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#agent-roster)
 [![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#tools)
 
-**[한국어 README](README.ko.md)** · **[Setup Guide](SETUP.md)** · **[Cheatsheet](AGENT-CHEATSHEET.md)** · **[Integration](INTEGRATION.md)** · **[Contributing](CONTRIBUTING.md)**
+**[한국어 README](README.ko.md)** · **[Setup Guide](docs/SETUP.md)** · **[Cheatsheet](docs/AGENT-CHEATSHEET.md)** · **[Integration](docs/INTEGRATION.md)** · **[Contributing](docs/CONTRIBUTING.md)**
 
 </div>
 
@@ -128,7 +128,7 @@ Run these in parallel:
 Then have implementer execute the combined plan.
 ```
 
-> See [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) for 20+ ready-to-use prompts.
+> See [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) for 20+ ready-to-use prompts.
 
 ---
 
@@ -314,7 +314,7 @@ claude-cost set-budget 20.00
 
 ### Rust binary — `claude-tools`
 
-All three tools compiled into one zero-dependency binary — no Python required.
+All three tools + a live cost monitor compiled into one zero-dependency binary — no Python required.
 
 ```bash
 cd rust
@@ -324,6 +324,8 @@ cargo build --release
 ./target/release/claude-tools snippet list
 ./target/release/claude-tools handoff save --note "done"
 ./target/release/claude-tools cost estimate --snippet full-pipeline
+./target/release/claude-tools watch              # live cost monitor
+./target/release/claude-tools watch --interval 5 # refresh every 5s
 ```
 
 **Or install globally:**
@@ -334,9 +336,10 @@ cargo install --path rust/claude-tools
 claude-tools snippet list
 claude-tools handoff load | claude
 claude-tools cost month
+claude-tools watch   # real-time token + cost stream
 ```
 
-> See [INTEGRATION.md](INTEGRATION.md) for how `claude-tools` connects with **claw-code**, the Rust-based Claude CLI harness.
+> See [INTEGRATION.md](docs/INTEGRATION.md) for how `claude-tools` connects with **claw-code**, the Rust-based Claude CLI harness.
 
 ---
 
@@ -369,18 +372,26 @@ Claudecode-Agent/
 │   └── install-tools.sh          ← macOS / Linux one-shot installer
 ├── rust/
 │   ├── Cargo.toml                ← workspace root
-│   └── claude-tools/             ← Rust binary (snippet + handoff + cost)
+│   └── claude-tools/             ← Rust binary (snippet + handoff + cost + watch)
 │       ├── Cargo.toml
 │       └── src/
 │           ├── main.rs
 │           ├── snippet.rs
 │           ├── handoff.rs
 │           ├── cost.rs
+│           ├── watch.rs          ← real-time live cost monitor (NEW)
 │           └── colors.rs
-├── AGENT-CHEATSHEET.md           ← ready-to-use prompt examples
-├── CLAUDE.md                     ← personal coding guidelines
-├── INTEGRATION.md                ← claw-code + Rust integration guide
-├── SETUP.md                      ← full environment setup
+├── docs/
+│   ├── SETUP.md                  ← full environment setup
+│   ├── SETUP.ko.md
+│   ├── AGENT-CHEATSHEET.md       ← ready-to-use prompt examples
+│   ├── AGENT-CHEATSHEET.ko.md
+│   ├── INTEGRATION.md            ← claw-code + Rust integration guide
+│   ├── INTEGRATION.ko.md
+│   ├── CONTRIBUTING.md           ← contribution guide
+│   ├── CONTRIBUTING.ko.md
+│   ├── CLAUDE.md                 ← personal coding guidelines
+│   └── CLAUDE.ko.md
 ├── setup-agents.ps1              ← Windows agent installer
 └── setup-agents.sh               ← macOS / Linux agent installer
 ```
@@ -391,11 +402,11 @@ Claudecode-Agent/
 
 | Document | EN | KO |
 |----------|----|-----|
-| Setup Guide | [SETUP.md](SETUP.md) | [SETUP.ko.md](SETUP.ko.md) |
-| Agent Cheatsheet | [AGENT-CHEATSHEET.md](AGENT-CHEATSHEET.md) | [AGENT-CHEATSHEET.ko.md](AGENT-CHEATSHEET.ko.md) |
-| Integration (claw-code + Rust) | [INTEGRATION.md](INTEGRATION.md) | [INTEGRATION.ko.md](INTEGRATION.ko.md) |
-| Contributing Guide | [CONTRIBUTING.md](CONTRIBUTING.md) | [CONTRIBUTING.ko.md](CONTRIBUTING.ko.md) |
-| Coding Guidelines | [CLAUDE.md](CLAUDE.md) | [CLAUDE.ko.md](CLAUDE.ko.md) |
+| Setup Guide | [SETUP.md](docs/SETUP.md) | [SETUP.ko.md](docs/SETUP.ko.md) |
+| Agent Cheatsheet | [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) | [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) |
+| Integration (claw-code + Rust) | [INTEGRATION.md](docs/INTEGRATION.md) | [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) |
+| Contributing Guide | [CONTRIBUTING.md](docs/CONTRIBUTING.md) | [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md) |
+| Coding Guidelines | [CLAUDE.md](docs/CLAUDE.md) | [CLAUDE.ko.md](docs/CLAUDE.ko.md) |
 | README | [README.md](README.md) | [README.ko.md](README.ko.md) |
 
 ---
@@ -408,6 +419,7 @@ Claudecode-Agent/
 | Switching to a completely different task | `/clear` |
 | Reference a specific file | `@src/auth.ts review this` |
 | Check spend | `/cost` |
+| Watch live cost in a second terminal | `claude-tools watch` |
 
 ---
 
@@ -441,10 +453,10 @@ docker ps   # verify GitHub MCP container is running
 
 ## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+Contributions are welcome! Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) first.
 
-- **New agent idea?** → open a [Feature Request](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=feature_request.md)
-- **Bug?** → open a [Bug Report](https://github.com/BcKmini/claude-code-multi-agent/issues/new?template=bug_report.md)
+- **New agent idea?** → open a [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md)
+- **Bug?** → open a [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md)
 - **New snippet idea?** → add it to `snippets/defaults.json` and send a PR
 
 ---

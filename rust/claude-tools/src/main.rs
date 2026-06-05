@@ -2,6 +2,7 @@ mod colors;
 mod snippet;
 mod handoff;
 mod cost;
+mod watch;
 
 use clap::{Parser, Subcommand};
 
@@ -9,7 +10,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "claude-tools",
     version = "1.0.0",
-    about = "Claude Code productivity tools: snippet manager, session handoff, cost estimator",
+    about = "Claude Code productivity tools: snippet manager, session handoff, cost estimator, live cost monitor",
     long_about = None
 )]
 struct Cli {
@@ -34,6 +35,12 @@ enum Commands {
         #[command(subcommand)]
         action: cost::CostCmd,
     },
+    /// Real-time live cost monitor (polls ~/.claude/projects/ JSONL)
+    Watch {
+        /// Refresh interval in seconds (default: 2)
+        #[arg(long, short, default_value = "2")]
+        interval: u64,
+    },
 }
 
 fn main() {
@@ -41,7 +48,8 @@ fn main() {
     let result = match cli.command {
         Commands::Snippet { action } => snippet::run(action),
         Commands::Handoff { action } => handoff::run(action),
-        Commands::Cost { action } => cost::run(action),
+        Commands::Cost    { action } => cost::run(action),
+        Commands::Watch   { interval } => watch::run(interval),
     };
     if let Err(e) = result {
         eprintln!("[ERROR] {e}");
