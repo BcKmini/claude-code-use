@@ -1,26 +1,26 @@
+[← README로 돌아가기](./README.md)
+
 # Claude Code Multi-Agent Cheatsheet
+
+상황별 프롬프트 모음. 복사해서 바로 사용.
+
+---
 
 ## 빠른 시작
 
-### 에이전트 확인
 ```
+# 에이전트 목록 확인
 /agents
-```
 
-### 전체 파이프라인
-```
+# 전체 파이프라인 (가장 많이 씀)
 Use the orchestrator to [큰 작업 설명]
-```
-예시:
-```
-Use the orchestrator to add user profile image upload feature with S3
 ```
 
 ---
 
 ## 상황별 프롬프트
 
-### 새 기능 개발
+### 새 기능 개발 (전체 파이프라인)
 ```
 Use the orchestrator to implement [기능명].
 Requirements:
@@ -70,7 +70,8 @@ Make it clear enough for a new developer to onboard in 30 minutes.
 
 ---
 
-## 병렬 실행
+## 병렬 실행 (시간 단축)
+
 ```
 Run these in parallel:
 1. Have planner design the auth module
@@ -105,7 +106,7 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 
 ---
 
-## 컨텍스트 관리
+## 컨텍스트 관리 (비용 절약)
 
 | 상황 | 명령 |
 |------|------|
@@ -119,9 +120,10 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 ## 에이전트별 모델 & 비용
 
 ```
-Opus   -> orchestrator, planner, security-auditor
-Sonnet -> implementer, reviewer, tester, performance-optimizer, database-expert
-Haiku  -> documenter
+Opus   -> orchestrator, planner, security-auditor   (복잡한 판단)
+Sonnet -> implementer, reviewer, tester,             (실행 위주)
+          performance-optimizer, database-expert
+Haiku  -> documenter                                 (단순 반복, 최저 비용)
 ```
 
 ---
@@ -132,12 +134,7 @@ Haiku  -> documenter
 ```
 /agents
 ```
-`.claude/agents/` 폴더에 .md 파일 있는지 확인
-
-**컨텍스트가 너무 커질 때**
-```
-/compact "다음 단계는 테스트 작성"
-```
+`.claude/agents/` 폴더에 `.md` 파일 있는지 확인.
 
 **에이전트가 범위를 벗어날 때**
 ```

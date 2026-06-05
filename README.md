@@ -1,26 +1,23 @@
 # Claude Code Multi-Agent System
-<div align="center">
-<img src="https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic" />
-<img src="https://img.shields.io/badge/Agents-9-green?style=flat-square" />
-<img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey?style=flat-square" />
-<img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" />
-</div>
 
-<div align="center">
-  <img src="assets/claude.png" alt="Claude" width="500">
-</div>
+> Claude Code를 위한 9개 전문 에이전트 시스템 — 복잡한 작업을 역할별 AI에게 분산시켜 품질과 효율을 동시에 높인다.
 
+![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blue?style=flat-square&logo=anthropic)
+![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Mac%20%7C%20Linux-lightgrey?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
 ---
 
-## 목차
+## 문서 목록
 
-- [왜 멀티 에이전트인가](#왜-멀티-에이전트인가)
-- [에이전트 구성](#에이전트-구성)
-- [빠른 시작](#빠른-시작)
-- [사용 예시](#사용-예시)
-- [파일 구조](#파일-구조)
-- [고급 사용법](#고급-사용법)
+| 문서 | 내용 |
+|------|------|
+| [README](./README.md) | 프로젝트 소개 및 빠른 시작 (현재 페이지) |
+| [SETUP.md](./SETUP.md) | 전체 환경 세팅 (MCP, Docker, 플러그인, 환경변수) |
+| [AGENT-CHEATSHEET.md](./AGENT-CHEATSHEET.md) | 상황별 프롬프트 모음 및 빠른 참조 |
+| [INTEGRATION.md](./INTEGRATION.md) | claw-code 연동 가이드 |
+| [CLAUDE.md](./CLAUDE.md) | 개인 개발 원칙 및 코딩 가이드라인 |
 
 ---
 
@@ -34,74 +31,64 @@
 
 [멀티 에이전트 방식]
 orchestrator -> planner(설계) -> implementer(구현) -> reviewer(리뷰) -> tester(테스트)
-              각 단계가 전문 역할에 집중 -> 더 높은 품질
 ```
 
-**장점:**
-- 각 에이전트가 자기 역할에만 집중 (컨텍스트 오염 없음)
+**장점**
+- 각 에이전트가 자기 역할에만 집중 — 컨텍스트 오염 없음
 - 병렬 실행으로 시간 단축 (planner + security-auditor 동시 실행 가능)
 - 모델별 비용 최적화 (단순 작업엔 Haiku, 중요 판단엔 Opus)
-- reviewer가 implementer의 결과를 독립적으로 검증
+- reviewer가 implementer 결과를 독립적으로 검증
 
 ---
 
 ## 에이전트 구성
 
-| # | 에이전트 | 모델 | 역할 | 권한 |
-|---|---------|------|------|------|
-| 00 | orchestrator | Opus | 총괄 지휘, 작업 분해 및 위임 | Read, Glob, Grep, Task |
-| 01 | planner | Opus | 설계·아키텍처 수립 (읽기 전용) | Read, Grep, Glob |
-| 02 | implementer | Sonnet | 실제 코드 작성·수정 | Read, Write, Edit, Bash |
-| 03 | reviewer | Sonnet | 버그·보안·품질·성능 리뷰 (읽기 전용) | Read, Grep, Glob |
-| 04 | tester | Sonnet | 유닛·통합·E2E 테스트 작성 | Read, Write, Edit, Bash |
-| 05 | security-auditor | Opus | OWASP Top 10 기준 보안 감사 | Read, Grep, Glob, Bash |
-| 06 | performance-optimizer | Sonnet | 성능 병목 분석 및 최적화 | Read, Grep, Glob, Edit |
-| 07 | database-expert | Sonnet | DB 스키마·쿼리·마이그레이션 | Read, Write, Edit, Bash |
-| 08 | documenter | Haiku | README·API 문서·주석 작성 | Read, Write, Edit |
-
-### 모델 선택 근거
-
-```
-Opus   -> orchestrator, planner, security-auditor
-         복잡한 판단·설계·보안 분석이 필요한 곳
-
-Sonnet -> implementer, reviewer, tester, performance-optimizer, database-expert
-         실행 위주, 코드 작성·분석 — 비용 효율 최적
-
-Haiku  -> documenter
-         단순 반복 작업, 최저 비용
-```
+| # | 에이전트 | 모델 | 역할 |
+|---|---------|------|------|
+| 00 | orchestrator | Opus | 총괄 지휘, 작업 분해 및 위임 |
+| 01 | planner | Opus | 설계·아키텍처 수립 (읽기 전용) |
+| 02 | implementer | Sonnet | 실제 코드 작성·수정 |
+| 03 | reviewer | Sonnet | 버그·보안·품질·성능 리뷰 (읽기 전용) |
+| 04 | tester | Sonnet | 유닛·통합·E2E 테스트 작성 |
+| 05 | security-auditor | Opus | OWASP Top 10 기준 보안 감사 |
+| 06 | performance-optimizer | Sonnet | 성능 병목 분석 및 최적화 |
+| 07 | database-expert | Sonnet | DB 스키마·쿼리·마이그레이션 |
+| 08 | documenter | Haiku | README·API 문서·주석 작성 |
 
 ---
 
 ## 빠른 시작
 
-### 1. 에이전트 설치
+### Windows
 
-**Windows (PowerShell)**
 ```powershell
 git clone https://github.com/BcKmini/claude-code-multi-agent.git
 cd claude-code-multi-agent
 powershell -ExecutionPolicy Bypass -File setup-agents.ps1
 ```
 
-**Mac / Linux**
+### Mac / Linux
+
 ```bash
 git clone https://github.com/BcKmini/claude-code-multi-agent.git
 cd claude-code-multi-agent
-mkdir -p ~/.claude/agents
-cp agents/*.md ~/.claude/agents/
-echo 'export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1' >> ~/.zshrc
-source ~/.zshrc
+bash setup-agents.sh
 ```
 
-### 2. 설치 확인
+스크립트가 자동으로:
+- `~/.claude/agents/`에 에이전트 파일 복사
+- `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 환경변수 영구 설정 (zsh/bash 자동 감지)
+- `.claudeignore` 생성
+
+### 설치 확인
 
 Claude Code 실행 후:
 ```
 /agents
 ```
 9개 에이전트가 목록에 표시되면 완료.
+
+> 전체 환경 세팅 (MCP 서버, Docker, 플러그인 등)은 [SETUP.md](./SETUP.md)를 참고.
 
 ---
 
@@ -116,41 +103,22 @@ Requirements:
 Run the full pipeline: planner -> implementer -> reviewer -> tester
 ```
 
-### 코드 리뷰만
+### 코드 리뷰
 ```
 Have the reviewer subagent review src/api/auth.ts
 Focus on security vulnerabilities and error handling.
 ```
 
-### 보안 감사
-```
-Have security-auditor do a full OWASP audit of src/api/
-Report all findings by severity.
-```
-
-### 성능 분석
-```
-Have performance-optimizer analyze src/db/queries.ts
-The symptom is: user list API is taking 3+ seconds
-```
-
-### DB 스키마 설계
-```
-Have database-expert design the schema for a notification system.
-Requirements:
-- 유저별 알림 설정
-- 읽음/안읽음 상태
-Include migration files and index strategy.
-```
-
-### 병렬 실행 (시간 단축)
+### 병렬 실행
 ```
 Run these in parallel:
-1. Have planner design the notification module architecture
-2. Have database-expert design the notification schema
-3. Have security-auditor review notification requirements
+1. Have planner design the notification module
+2. Have database-expert design the schema
+3. Have security-auditor review requirements
 Then have implementer execute the combined plan.
 ```
+
+> 더 많은 프롬프트 예시는 [AGENT-CHEATSHEET.md](./AGENT-CHEATSHEET.md)를 참고.
 
 ---
 
@@ -168,17 +136,19 @@ claude-code-multi-agent/
 │   ├── 06-performance-optimizer.md
 │   ├── 07-database-expert.md
 │   └── 08-documenter.md
-├── CLAUDE.md
-├── SETUP.md
-├── AGENT-CHEATSHEET.md
-├── setup-agents.ps1
+├── AGENT-CHEATSHEET.md   <- 상황별 프롬프트 모음
+├── CLAUDE.md             <- 개발 원칙 가이드라인
+├── INTEGRATION.md        <- claw-code 연동 가이드
+├── SETUP.md              <- 전체 환경 세팅
+├── setup-agents.ps1      <- Windows 설치 스크립트
+├── setup-agents.sh       <- Mac/Linux 설치 스크립트
 └── README.md
 ```
 
-### 설치 경로
+### 에이전트 설치 경로
 
 | 위치 | 적용 범위 |
-|------|----------|
+|------|-----------|
 | `~/.claude/agents/` | 글로벌 — 모든 프로젝트에서 사용 |
 | `.claude/agents/` (프로젝트 루트) | 로컬 — 해당 프로젝트에서만 사용 |
 
@@ -188,7 +158,7 @@ claude-code-multi-agent/
 
 ### CLAUDE.md로 에이전트 동작 제어
 
-프로젝트 루트에 `CLAUDE.md` 배치 시 Claude가 자동으로 읽음.
+프로젝트 루트에 `CLAUDE.md` 배치 시 Claude가 자동으로 읽는다.
 
 ```markdown
 ## 에이전트 시스템
@@ -199,6 +169,8 @@ claude-code-multi-agent/
 - .env.production
 ```
 
+> 개발 원칙 전체는 [CLAUDE.md](./CLAUDE.md) 참고.
+
 ### 컨텍스트 비용 관리
 
 | 상황 | 명령 |
@@ -207,13 +179,6 @@ claude-code-multi-agent/
 | 완전히 다른 작업 시작 | `/clear` |
 | 특정 파일만 참조 | `@src/auth/login.ts 리뷰해줘` |
 | 비용 확인 | `/cost` |
-
-### 에이전트 범위 제한
-
-```
-Have reviewer ONLY review src/auth.ts.
-Do NOT suggest changes to other files.
-```
 
 ---
 
@@ -225,9 +190,14 @@ Do NOT suggest changes to other files.
 - Claude Code 재시작
 
 **Agent Teams가 작동 안 함**
-```powershell
-[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS", "User")
+```bash
+# Mac/Linux
+echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS
 # "1" 이 출력되어야 함
+```
+```powershell
+# Windows
+[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS", "User")
 ```
 
 **컨텍스트가 너무 커질 때**
