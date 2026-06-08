@@ -107,6 +107,24 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 
 ---
 
+## Slash Commands — Tools
+
+| Command | What it does | Example |
+|---------|-------------|---------|
+| `/snippet list` | Browse saved prompts | `/snippet list --tag security` |
+| `/snippet run` | Execute a prompt template | `/snippet run full-pipeline` |
+| `/handoff save` | Save session context | `/handoff save` |
+| `/handoff load` | Restore last session | `/handoff load` |
+| `/cost estimate` | Pre-run cost estimate | `/cost estimate full-pipeline` |
+| `/cost month` | Monthly spend summary | `/cost month` |
+| `/review-diff` | Code review from git diff | `/review-diff --focus security` |
+| `/review-diff --staged` | Review staged changes | `/review-diff --staged` |
+| `/review-diff --base main` | Compare branch to main | `/review-diff --base main` |
+| `/remind` | Show pending TODO items | `/remind` |
+| `/remind --quiet` | Count only | `/remind --quiet` |
+
+---
+
 ## Context Management (Cost Control)
 
 | Situation | Command |
@@ -114,8 +132,24 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 | After finishing a step | `/compact` |
 | Starting a completely different task | `/clear` |
 | Check spend | `/cost` |
-| Live cost monitor | `claude-tools watch` |
+| Live cost monitor (second terminal) | `claude-tools watch` |
+| Environment health check | `claude-tools env` |
+| Resume with pending tasks | `claude-remind \| claude` |
+| Full session restore | `claude-handoff load \| claude` |
 | Reference a specific file | `@src/auth/login.ts review this file` |
+
+---
+
+## Session Workflow
+
+```bash
+# End of session
+claude-handoff save --note "OAuth done, next: email verification"
+
+# Start of next session (pick one or both)
+claude-remind | claude          # see pending TODO items
+claude-handoff load | claude    # full git context restore
+```
 
 ---
 
@@ -142,4 +176,9 @@ Check that `.md` files exist in `~/.claude/agents/`.
 ```
 Have reviewer ONLY review src/auth.ts.
 Do NOT suggest changes to other files.
+```
+
+**Check full environment**
+```bash
+claude-tools env   # or: make env
 ```

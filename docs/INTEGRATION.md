@@ -112,7 +112,7 @@ docker compose run rag-ingest   # index your codebase
 
 ## claude-tools Rust Binary
 
-All three Python tools compiled into a single zero-dependency binary.
+All Python tools + live monitor + environment check compiled into a single zero-dependency binary.
 
 ```
 rust/
@@ -123,7 +123,8 @@ rust/
         ├── snippet.rs    ← ~/.claude/snippets.json manager
         ├── handoff.rs    ← ~/.claude/handoffs/ session docs
         ├── cost.rs       ← ~/.claude/projects/ JSONL parser + estimates
-        ├── watch.rs      ← real-time live cost monitor (NEW)
+        ├── watch.rs      ← real-time live cost monitor
+        ├── env.rs        ← environment health check (NEW)
         └── colors.rs     ← ANSI color helpers
 ```
 
@@ -134,29 +135,50 @@ cd rust
 cargo build --release
 # binary: rust/target/release/claude-tools
 
+# or via Makefile
+make install-rust
+
 # or install globally
 cargo install --path rust/claude-tools
 ```
 
-### Full Workflow (No Python)
+### All Subcommands
 
 ```bash
-# Add both binaries to PATH
-export PATH="$PATH:/path/to/claude-tools/target/release"
-export PATH="$PATH:/path/to/claw-code/target/release"
+claude-tools snippet list
+claude-tools snippet run full-pipeline
 
-# Start session
-claw
-
-# Watch live costs during session
-claude-tools watch
-
-# Save handoff before closing
 claude-tools handoff save --note "auth done, next: tests"
-
-# Resume next session
 claude-tools handoff load | claude
+
+claude-tools cost estimate --snippet full-pipeline
+claude-tools cost month
+claude-tools cost set-budget 20
+
+claude-tools watch              # live cost monitor (2s refresh)
+claude-tools watch --interval 5
+
+claude-tools env                # environment health check
 ```
+
+### claude-tools env — Environment Health Check
+
+```bash
+claude-tools env
+```
+
+```
+Claude Code Environment
+
+  ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
+  ✓ ~/.claude/           exists
+  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
+  ✓ handoffs             3 saved, latest: 20250608-143022.md
+  ✓ sessions             4 projects, 12 session files
+```
+
+Useful after a fresh install or when something stops working.
 
 ### claude-tools watch — Live Cost Monitor
 
@@ -164,8 +186,6 @@ claude-tools handoff load | claude
 claude-tools watch              # monitor latest session (refresh every 2s)
 claude-tools watch --interval 5 # refresh every 5 seconds
 ```
-
-Shows a live-updating table as tokens flow in:
 
 ```
 Claude Code — Live Cost Monitor  (Ctrl+C to exit)
@@ -176,6 +196,28 @@ Claude Code — Live Cost Monitor  (Ctrl+C to exit)
  12:01:44 opus       456    1,596    $0.1263
 ─────────────────────────────────────────────
  TOTAL              2,588    6,926   $0.2125
+```
+
+### Full Workflow (No Python)
+
+```bash
+# Add to PATH
+export PATH="$PATH:$(pwd)/rust/target/release"
+
+# Start session
+claw
+
+# Watch live costs in a second terminal
+claude-tools watch
+
+# Check environment
+claude-tools env
+
+# Save handoff before closing
+claude-tools handoff save --note "auth done, next: tests"
+
+# Resume next session
+claude-tools handoff load | claude
 ```
 
 ### Dependency Comparison

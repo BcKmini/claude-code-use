@@ -4,7 +4,7 @@
 
 # 통합 가이드 — claw-code & claude-tools
 
-`Claudecode-Agent`와 `claw-code`는 서로 다른 층을 담당하며 함께 쓸 때 더 강력하다.
+`Claudecode-Agent`와 `claw-code`는 서로 다른 층을 담당하며 함께 쓸 때 더 강력합니다.
 
 | 시스템 | 역할 | 링크 |
 |--------|------|------|
@@ -67,7 +67,7 @@ Claudecode-Agent                 claw-code
          동일한 agents/*.md 정의 공유 가능
 ```
 
-**에이전트 정의 (`agents/*.md`)는 양쪽 런타임에서 모두 동작한다.**
+**에이전트 정의 (`agents/*.md`)는 양쪽 런타임에서 모두 동작합니다.**
 
 ---
 
@@ -112,7 +112,7 @@ docker compose run rag-ingest   # 코드베이스 인덱싱
 
 ## claude-tools Rust 바이너리
 
-Python 도구 세 가지 + watch 실시간 모니터를 하나의 바이너리로.
+Python 도구 전체 + 실시간 모니터 + 환경 헬스체크를 하나의 바이너리로 컴파일합니다.
 
 ```
 rust/
@@ -123,7 +123,8 @@ rust/
         ├── snippet.rs    ← ~/.claude/snippets.json 관리
         ├── handoff.rs    ← ~/.claude/handoffs/ 세션 문서
         ├── cost.rs       ← ~/.claude/projects/ JSONL 파싱 + 비용 추정
-        ├── watch.rs      ← 실시간 비용 모니터 (신규)
+        ├── watch.rs      ← 실시간 비용 모니터
+        ├── env.rs        ← 환경 헬스체크 (신규)
         └── colors.rs     ← ANSI 컬러 헬퍼
 ```
 
@@ -134,28 +135,50 @@ cd rust
 cargo build --release
 # 바이너리: rust/target/release/claude-tools
 
+# Makefile 사용
+make install-rust
+
 # 전역 설치
 cargo install --path rust/claude-tools
 ```
 
-### 전체 워크플로우 (Python 없이)
+### 전체 서브커맨드
 
 ```bash
-export PATH="$PATH:/path/to/claude-tools/target/release"
-export PATH="$PATH:/path/to/claw-code/target/release"
+claude-tools snippet list
+claude-tools snippet run full-pipeline
 
-# 세션 시작
-claw
-
-# 세션 중 실시간 비용 모니터링
-claude-tools watch
-
-# 세션 종료 전 핸드오프 저장
 claude-tools handoff save --note "auth 완료, 다음: 테스트 작성"
-
-# 다음 세션에서 컨텍스트 복원
 claude-tools handoff load | claude
+
+claude-tools cost estimate --snippet full-pipeline
+claude-tools cost month
+claude-tools cost set-budget 20
+
+claude-tools watch              # 실시간 비용 모니터 (2초 간격)
+claude-tools watch --interval 5
+
+claude-tools env                # 환경 헬스체크
 ```
+
+### claude-tools env — 환경 헬스체크
+
+```bash
+claude-tools env
+```
+
+```
+Claude Code Environment
+
+  ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
+  ✓ ~/.claude/           exists
+  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
+  ✓ handoffs             3 saved, latest: 20250608-143022.md
+  ✓ sessions             4 projects, 12 session files
+```
+
+초기 세팅 후 또는 무언가 작동 안 할 때 한눈에 확인할 수 있습니다.
 
 ### claude-tools watch — 실시간 비용 모니터
 
@@ -163,8 +186,6 @@ claude-tools handoff load | claude
 claude-tools watch              # 최신 세션 모니터링 (2초 간격)
 claude-tools watch --interval 5 # 5초 간격
 ```
-
-토큰이 흐르는 동안 라이브 업데이트 테이블 표시:
 
 ```
 Claude Code — 실시간 비용 모니터  (Ctrl+C 종료)
@@ -175,6 +196,27 @@ Claude Code — 실시간 비용 모니터  (Ctrl+C 종료)
  12:01:44 opus       456    1,596    $0.1263
 ─────────────────────────────────────────────
  TOTAL              2,588    6,926   $0.2125
+```
+
+### 전체 워크플로우 (Python 없이)
+
+```bash
+export PATH="$PATH:$(pwd)/rust/target/release"
+
+# 세션 시작
+claw
+
+# 다른 터미널에서 실시간 비용 모니터링
+claude-tools watch
+
+# 환경 확인
+claude-tools env
+
+# 세션 종료 전 핸드오프 저장
+claude-tools handoff save --note "auth 완료, 다음: 테스트 작성"
+
+# 다음 세션에서 컨텍스트 복원
+claude-tools handoff load | claude
 ```
 
 ### 의존성 비교

@@ -4,15 +4,15 @@
 
 # Claude Code 멀티 에이전트 시스템
 
-**Claude Code를 위한 9개의 전문 에이전트 + 3개의 생산성 도구**
+**Claude Code를 위한 9개의 전문 에이전트 + 5개의 생산성 도구**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/claude-code-multi-agent)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/Claudecode-Agent)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
 [![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#에이전트-구성)
-[![Tools](https://img.shields.io/badge/Tools-3-informational?style=flat-square)](#도구)
+[![Tools](https://img.shields.io/badge/Tools-5-informational?style=flat-square)](#도구)
 
 **[English README](README.md)** · **[환경 세팅](docs/SETUP.ko.md)** · **[치트시트](docs/AGENT-CHEATSHEET.ko.md)** · **[연동 가이드](docs/INTEGRATION.ko.md)** · **[기여 가이드](docs/CONTRIBUTING.ko.md)**
 
@@ -22,25 +22,67 @@
 
 ## 이게 뭔가요?
 
-**Claude Code**를 즉시 강화하는 네 가지:
+**Claude Code**를 즉시 강화하는 도구 모음:
 
 1. **9개의 전문 서브 에이전트** — 설계, 구현, 리뷰, 테스트, 보안 등 각자 하나에만 집중
 2. **`snippet`** — 자주 쓰는 프롬프트를 저장하고 커맨드 한 번에 꺼내 쓰는 프롬프트 매니저
 3. **`claude-handoff`** — 세션 전체 컨텍스트(git 상태, 할 일, 메모)를 저장하고 다음 세션에서 복원
 4. **`claude-cost`** — 프롬프트 실행 전 비용 추정 및 실제 사용량 추적
+5. **`claude-review-diff`** — git diff에서 구조화된 코드 리뷰 프롬프트 자동 생성
+6. **`claude-remind`** — 세션 시작 시 TODO 미완료 항목을 자동으로 표시
 
-세 가지 도구 모두 Python CLI, Claude Code 슬래시 커맨드(`/snippet`, `/handoff`, `/cost`), 그리고 단일 **Rust 바이너리**(`claude-tools`)로 제공됩니다.
-
-Claude 하나가 모든 일을 하는 대신, 각 작업을 가장 적합한 에이전트에게 라우팅합니다.
+모든 도구는 Python CLI, Claude Code 슬래시 커맨드, 단일 **Rust 바이너리**(`claude-tools`)로 제공됩니다.
 
 ```
 나                       Orchestrator
  │                           │
- └──► "OAuth 로그인 추가" ──► ├──► planner       (아키텍처 설계)
-                             ├──► database-expert (스키마 설계)
-                             ├──► implementer   (코드 작성)
-                             ├──► reviewer      (코드 리뷰)
-                             └──► tester        (테스트 작성)
+ └──► "OAuth 로그인 추가" ──► ├──► planner         (아키텍처 설계)
+                             ├──► database-expert  (스키마 설계)
+                             ├──► implementer      (코드 작성)
+                             ├──► reviewer         (코드 리뷰)
+                             └──► tester           (테스트 작성)
+```
+
+---
+
+## 빠른 시작
+
+### 1. Claude Code 설치
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude   # 처음 실행 시 Anthropic 계정 인증
+```
+
+### 2. 클론 및 설치
+
+```powershell
+# Windows
+git clone https://github.com/BcKmini/Claudecode-Agent.git
+cd Claudecode-Agent
+powershell -ExecutionPolicy Bypass -File setup-agents.ps1
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/BcKmini/Claudecode-Agent.git
+cd Claudecode-Agent
+bash setup-agents.sh
+```
+
+### 3. 도구 설치 (한 번에)
+
+```bash
+make install            # 에이전트 + 슬래시 커맨드 + Python 도구
+make install-rust       # 선택: Rust 바이너리 (cargo 필요)
+```
+
+### 4. 확인
+
+```
+claude
+/agents          # → 9개 에이전트 목록
+/snippet list    # → 기본 스니펫 목록
 ```
 
 ---
@@ -59,127 +101,39 @@ Claude 하나가 모든 일을 하는 대신, 각 작업을 가장 적합한 에
 | 07 | **database-expert** | Sonnet | DB 스키마 설계·쿼리·마이그레이션 |
 | 08 | **documenter** | Haiku | README·API 문서·인라인 주석 작성 |
 
-> **왜 에이전트를 분리하나요?**  
-> 각 에이전트는 자기 역할에 관련된 컨텍스트만 가집니다. "설계 모드"와 "구현 모드"가 섞이지 않아요. 병렬 실행(planner + security-auditor 동시)으로 작업 시간도 단축됩니다.
+> 각 에이전트는 자기 역할에 관련된 컨텍스트만 가집니다. 병렬 실행(planner + security-auditor 동시)으로 작업 시간도 단축됩니다.
 
----
-
-## 빠른 시작
-
-### 1. Claude Code 설치
-
-```bash
-npm install -g @anthropic-ai/claude-code
-claude   # 처음 실행 시 Anthropic 계정 인증
-```
-
-### 2. 에이전트 설치
-
-```powershell
-# Windows
-git clone https://github.com/BcKmini/claude-code-multi-agent.git
-cd claude-code-multi-agent
-powershell -ExecutionPolicy Bypass -File setup-agents.ps1
-```
-
-```bash
-# macOS / Linux
-git clone https://github.com/BcKmini/claude-code-multi-agent.git
-cd claude-code-multi-agent
-bash setup-agents.sh
-```
-
-### 3. 확인
-
-```
-claude
-/agents          # → 9개 에이전트 목록 표시
-```
-
----
-
-## 에이전트 사용 예시
-
-### 기능 전체 파이프라인
-
-```
-Use the orchestrator to implement OAuth 2.0 login with Google.
-Requirements:
-- JWT 토큰 발급
-- 기존 이메일 로그인과 연동
-
-Run the full pipeline: planner -> implementer -> reviewer -> tester
-```
-
-### 코드 리뷰
-
-```
-Have the reviewer subagent review src/api/auth.ts
-Focus on security vulnerabilities and error handling.
-```
-
-### 병렬 실행 (시간 단축)
-
-```
-Run these in parallel:
-1. Have planner design the notification module
-2. Have database-expert design the schema
-3. Have security-auditor review the requirements
-Then have implementer execute the combined plan.
-```
-
-> 20개 이상의 바로 쓸 수 있는 프롬프트는 [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) 참고.
+> 바로 쓸 수 있는 프롬프트 20개 이상 → [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md)
 
 ---
 
 ## 도구
 
-Claude Code가 기본으로 제공하지 않는 기능을 채우는 세 가지 도구.
+Claude Code가 기본으로 제공하지 않는 기능을 채우는 5가지 도구.
 
-### 통합 설치 (한 번에)
+### 슬래시 커맨드 한눈에 보기
 
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File tools\install-tools.ps1
-```
-
-```bash
-# macOS / Linux
-bash tools/install-tools.sh
-```
-
-설치 스크립트가 자동으로:
-- `/snippet`, `/handoff`, `/cost` 슬래시 커맨드를 `~/.claude/commands/`에 설치
-- `snippets/defaults.json`의 기본 스니펫 20개 임포트
-- 쉘 프로파일에 `snippet`, `claude-handoff`, `claude-cost` 함수 등록
-
-> Python 없이 사용하려면 → [Rust 바이너리](#rust-바이너리--claude-tools) 참고
+| 커맨드 | 기능 |
+|--------|------|
+| `/snippet` | 프롬프트 템플릿 실행·저장·목록 |
+| `/handoff` | 세션 컨텍스트 저장/로드 |
+| `/cost` | API 비용 추정 및 추적 |
+| `/review-diff` | git diff 기반 코드 리뷰 프롬프트 |
+| `/remind` | 세션 시작 시 TODO 미완료 항목 표시 |
 
 ---
 
 ### 도구 1 — `snippet` — 개인 프롬프트 매니저
 
-Claude 프롬프트를 이름으로 저장하고, 터미널이나 Claude Code 안에서 한 커맨드로 꺼내 씁니다.
-
-**터미널**
+Claude 프롬프트를 이름으로 저장하고, 한 커맨드로 꺼내 씁니다.
 
 ```bash
-snippet list                          # 전체 목록
-snippet list --tag pipeline           # 태그로 필터
-snippet save myfix "Fix {{BUG}} in {{FILE}}" --tags bug
-snippet run myfix --var BUG="null ref" --var FILE="auth.ts"
-snippet run full-pipeline | claude    # 바로 Claude에 파이프
-
+snippet list                                   # 전체 목록
+snippet run full-pipeline | claude             # Claude에 바로 파이프
+snippet save myfix "Fix {{BUG}} in {{FILE}}"   # 템플릿 변수 사용
 snippet search security
-snippet show code-review
-snippet cp code-review my-review
-snippet delete my-review --force
-snippet stats
 snippet export my-backup.json
-snippet import snippets/defaults.json
 ```
-
-**Claude Code 안에서**
 
 ```
 /snippet list
@@ -187,58 +141,20 @@ snippet import snippets/defaults.json
 /snippet search security
 ```
 
-**템플릿 변수** — `{{변수명}}`을 넣으면 실행 시점에 채웁니다:
-
-```bash
-snippet run new-feature \
-  --var FEATURE="사용자 알림" \
-  --var LANG="TypeScript" \
-  --var REQUIREMENTS="실시간 푸시, 이메일 다이제스트"
-```
-
-**기본 제공 스니펫 (20개)**
-
-| 이름 | 태그 | 용도 |
-|------|------|------|
-| `full-pipeline` | pipeline | 템플릿 변수 포함 전체 파이프라인 |
-| `new-feature` | pipeline, feature | 처음부터 기능 설계·구현 |
-| `fix-bug` | bug | 버그 수정 + 회귀 테스트 |
-| `hotfix` | bug, urgent | 긴급 프로덕션 핫픽스 |
-| `code-review` | review | 파일 단위 코드 리뷰 |
-| `pr-review` | review, pr | 머지 전 diff 리뷰 |
-| `security-audit` | security | OWASP Top 10 감사 |
-| `parallel-design` | parallel | 설계·스키마·보안 병렬 실행 |
-| `db-schema` | database | 스키마 + 인덱스 전략 + 마이그레이션 |
-| `db-migrate` | database, migration | 롤백 계획 포함 마이그레이션 |
-| `performance` | performance | 성능 병목 분석 |
-| `write-tests` | test | 종합 테스트 스위트 작성 |
-| `write-docs` | docs | README + JSDoc 업데이트 |
-| `refactor` | refactor | 테스트 통과 보장하는 안전한 리팩터링 |
-| `explain` | explain | 낯선 코드 설명 요청 |
-| `api-review` | review, api | REST API 설계 리뷰 |
-| `nextjs-feature` | nextjs, frontend | Next.js 15 App Router 기능 구현 |
-| `fastapi-endpoint` | fastapi, backend | FastAPI 엔드포인트 + 테스트 |
-| `context-reset` | meta | 컨텍스트 요약 + 다음 단계 정리 |
-| `cost-check` | meta | 세션 비용 확인 |
+**기본 스니펫 20개** — `full-pipeline`, `code-review`, `security-audit`, `write-tests`, `refactor`, `db-schema` 등. [snippets/defaults.json](snippets/defaults.json) 참고.
 
 ---
 
 ### 도구 2 — `claude-handoff` — 세션 연속성
 
-세션 전체 컨텍스트(git 상태, 열린 작업, 요약 메모)를 마크다운 파일로 저장합니다. 다음 세션에서 로드하면 "어디서 멈췄더라?"가 사라집니다.
-
-**터미널**
+세션 전체 컨텍스트를 저장하고 다음 세션에 바로 복원합니다.
 
 ```bash
-claude-handoff save                    # 메모 입력 후 컨텍스트 저장
-claude-handoff save --note "auth 완료, 다음: 테스트 작성"
-claude-handoff load | claude           # 최근 핸드오프를 Claude에 로드
-claude-handoff list                    # 저장된 핸드오프 목록
-claude-handoff show --id 20250101-120000
-claude-handoff clean --days 30 --force # 오래된 핸드오프 삭제
+claude-handoff save --note "OAuth 완료, 다음: 이메일 인증"
+claude-handoff load | claude    # 바로 재개
+claude-handoff list
+claude-handoff clean --days 30
 ```
-
-**Claude Code 안에서**
 
 ```
 /handoff save
@@ -246,62 +162,25 @@ claude-handoff clean --days 30 --force # 오래된 핸드오프 삭제
 /handoff list
 ```
 
-**핸드오프에 담기는 정보:**
-
-- 현재 git 브랜치, 최근 커밋 5개, 워킹 트리 상태, diff stat
-- 리모트 URL, 레포 루트 경로
-- `TODO.md` / `TASKS.md` 내용 (있을 경우)
-- 직접 입력한 요약 메모
-- 다음 세션에 바로 쓸 수 있는 **재개 프롬프트**
-
-**재개 워크플로우:**
-
-```bash
-# 세션 종료
-claude-handoff save --note "OAuth 완료; 다음: 이메일 인증"
-
-# 다음 세션 시작
-claude-handoff load | claude
-```
+**핸드오프에 담기는 정보:** git 브랜치, 최근 커밋 5개, 워킹 트리 상태, diff stat, TODO.md 내용, 요약 메모, 재개 프롬프트.
 
 ---
 
 ### 도구 3 — `claude-cost` — 비용 추정 & 추적
 
-실행 전에 프롬프트 비용을 확인하세요. 세션 로그에서 실제 사용량을 추적하고 월 예산도 설정할 수 있습니다.
-
-**터미널**
+실행 전에 프롬프트 비용을 확인하고 실제 사용량을 추적합니다.
 
 ```bash
-# 스니펫 기준 9개 에이전트 전체 비용 추정
 claude-cost estimate --snippet full-pipeline --agents 9
-
-# 임의 프롬프트 텍스트 추정
-claude-cost estimate "auth 모듈 전체 리팩터링"
-
-# 최근 7일 사용 내역
-claude-cost history
-
-# 월별 요약
 claude-cost month
-
-# 에이전트별 비용 분석
-claude-cost agents
-
-# 월 예산 설정 (추정치에 % 표시)
 claude-cost set-budget 20.00
 ```
 
-**Claude Code 안에서**
-
 ```
 /cost estimate full-pipeline
-/cost history
 /cost month
 /cost agents
 ```
-
-**모델 가격표**
 
 | 모델 | 입력 (100만 토큰) | 출력 (100만 토큰) |
 |------|-----------------|-----------------|
@@ -311,34 +190,103 @@ claude-cost set-budget 20.00
 
 ---
 
+### 도구 4 — `claude-review-diff` — git diff 코드 리뷰
+
+현재 git 변경사항을 구조화된 코드 리뷰 프롬프트로 변환해 Claude에 바로 파이프합니다.
+
+```bash
+claude-review-diff                       # 스테이징 전 변경사항 리뷰
+claude-review-diff --staged              # 스테이징된 변경사항 리뷰
+claude-review-diff --base main           # 브랜치를 main과 비교
+claude-review-diff --focus security      # 보안 중점 리뷰
+claude-review-diff | claude              # Claude에 바로 파이프
+```
+
+```
+/review-diff
+/review-diff --staged
+/review-diff --base main --focus security
+```
+
+**Focus 옵션:** `security` · `performance` · `correctness` · `style` · `tests` · `all`
+
+출력은 심각도 순 정렬: **Critical → Major → Minor → Nit**
+
+---
+
+### 도구 5 — `claude-remind` — 세션 시작 리마인더
+
+TODO.md / TASKS.md / CLAUDE.md에서 미완료 체크박스(`- [ ]`)를 스캔해 세션 재개 프롬프트를 출력합니다.
+
+```bash
+claude-remind                # 미완료 항목 전체 + 재개 프롬프트
+claude-remind --quiet        # 개수만 표시
+claude-remind | claude       # Claude에 바로 파이프
+```
+
+```
+/remind
+/remind --quiet
+```
+
+**세션 종료/시작 워크플로우:**
+
+```bash
+# 세션 종료
+claude-handoff save --note "Auth 완료, 다음: 이메일 인증"
+
+# 세션 시작
+claude-remind | claude         # 미완료 항목 확인
+claude-handoff load | claude   # 전체 컨텍스트 복원
+```
+
+---
+
 ### Rust 바이너리 — `claude-tools`
 
-세 가지 도구 + 실시간 비용 모니터를 의존성 없는 단일 바이너리로 컴파일합니다 — Python 불필요.
+모든 도구를 의존성 없는 단일 바이너리로 컴파일 — Python 불필요.
 
 ```bash
-cd rust
-cargo build --release
-
-# 사용
-./target/release/claude-tools snippet list
-./target/release/claude-tools handoff save --note "완료"
-./target/release/claude-tools cost estimate --snippet full-pipeline
-./target/release/claude-tools watch              # 실시간 비용 모니터
-./target/release/claude-tools watch --interval 5 # 5초 간격
-```
-
-**전역 설치:**
-
-```bash
-cargo install --path rust/claude-tools
+cd rust && cargo build --release
+# 또는: make install-rust
 
 claude-tools snippet list
-claude-tools handoff load | claude
+claude-tools handoff save --note "완료"
 claude-tools cost month
-claude-tools watch   # 실시간 토큰·비용 스트림
+claude-tools watch              # 실시간 비용 모니터
+claude-tools watch --interval 5
+claude-tools env                # 환경 헬스체크
 ```
 
-> `claude-tools`와 claw-code 연동 방법은 [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) 참고.
+**`claude-tools env` 출력:**
+
+```
+Claude Code Environment
+
+  ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
+  ✓ ~/.claude/           exists
+  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
+  ✓ handoffs             3 saved, latest: 20250608-143022.md
+  ✓ sessions             4 projects, 12 session files
+```
+
+---
+
+## Makefile
+
+```bash
+make help           # 전체 타겟 목록
+make install        # 에이전트 + 슬래시 커맨드 + Python 도구
+make install-rust   # Rust 바이너리 빌드 및 설치
+make build          # cargo build --release
+make test           # 전체 테스트
+make lint           # clippy + ruff
+make fmt            # rustfmt + ruff format
+make status         # git log + 도구 설치 상태 확인
+make env            # Claude 환경 헬스체크
+make clean          # 빌드 아티팩트 제거
+```
 
 ---
 
@@ -346,53 +294,82 @@ claude-tools watch   # 실시간 토큰·비용 스트림
 
 ```
 Claudecode-Agent/
-├── agents/                       ← 에이전트 정의 (→ ~/.claude/agents/ 에 복사됨)
-│   ├── 00-orchestrator.md
-│   ├── 01-planner.md
-│   ├── 02-implementer.md
-│   ├── 03-reviewer.md
-│   ├── 04-tester.md
-│   ├── 05-security-auditor.md
-│   ├── 06-performance-optimizer.md
-│   ├── 07-database-expert.md
+├── Makefile                          ← 빌드 / 설치 / 테스트 / 정리
+├── setup-agents.ps1                  ← Windows 빠른 설치
+├── setup-agents.sh                   ← macOS / Linux 빠른 설치
+│
+├── agents/                           ← 에이전트 정의 → ~/.claude/agents/
+│   ├── 00-orchestrator.md  ·  01-planner.md  ·  02-implementer.md
+│   ├── 03-reviewer.md  ·  04-tester.md  ·  05-security-auditor.md
+│   ├── 06-performance-optimizer.md  ·  07-database-expert.md
 │   └── 08-documenter.md
-├── .claude/
-│   └── commands/
-│       ├── snippet.md            ← /snippet 슬래시 커맨드
-│       ├── handoff.md            ← /handoff 슬래시 커맨드
-│       └── cost.md               ← /cost 슬래시 커맨드
-├── snippets/
-│   └── defaults.json             ← 기본 프롬프트 템플릿 20개
+│
+├── .claude/commands/                 ← 슬래시 커맨드 → ~/.claude/commands/
+│   ├── snippet.md  ·  handoff.md  ·  cost.md
+│   ├── review-diff.md                ← 신규
+│   └── remind.md                     ← 신규
+│
+├── snippets/defaults.json            ← 기본 프롬프트 템플릿 20개
+│
 ├── tools/
-│   ├── snippet.py                ← 프롬프트 매니저 CLI
-│   ├── claude-handoff.py         ← 세션 연속성 CLI
-│   ├── claude-cost.py            ← 비용 추정 CLI
-│   ├── install-tools.ps1         ← Windows 통합 설치 스크립트
-│   └── install-tools.sh          ← macOS / Linux 통합 설치 스크립트
-├── rust/
-│   ├── Cargo.toml                ← workspace 루트
-│   └── claude-tools/             ← Rust 바이너리 (snippet + handoff + cost + watch)
-│       ├── Cargo.toml
-│       └── src/
-│           ├── main.rs
-│           ├── snippet.rs
-│           ├── handoff.rs
-│           ├── cost.rs
-│           ├── watch.rs          ← 실시간 비용 모니터 (신규)
-│           └── colors.rs
-├── docs/
-│   ├── SETUP.md                  ← 전체 환경 세팅 (MCP, Docker, 플러그인 등)
-│   ├── SETUP.ko.md
-│   ├── AGENT-CHEATSHEET.md       ← 바로 쓸 수 있는 프롬프트 모음
-│   ├── AGENT-CHEATSHEET.ko.md
-│   ├── INTEGRATION.md            ← claw-code + Rust 연동 가이드
-│   ├── INTEGRATION.ko.md
-│   ├── CONTRIBUTING.md           ← 기여 가이드
-│   ├── CONTRIBUTING.ko.md
-│   ├── CLAUDE.md                 ← 개인 코딩 원칙 가이드라인
-│   └── CLAUDE.ko.md
-├── setup-agents.ps1              ← Windows 에이전트 설치 스크립트
-└── setup-agents.sh               ← macOS / Linux 에이전트 설치 스크립트
+│   ├── snippet.py  ·  claude-handoff.py  ·  claude-cost.py
+│   ├── claude-review-diff.py         ← 신규
+│   ├── claude-remind.py              ← 신규
+│   ├── install-tools.ps1  ·  install-tools.sh
+│
+├── rust/claude-tools/src/
+│   ├── main.rs  ·  snippet.rs  ·  handoff.rs  ·  cost.rs
+│   ├── watch.rs  ·  env.rs (신규)  ·  colors.rs
+│
+└── docs/
+    ├── SETUP.md / SETUP.ko.md
+    ├── AGENT-CHEATSHEET.md / .ko.md
+    ├── INTEGRATION.md / .ko.md
+    ├── CONTRIBUTING.md / .ko.md
+    └── CLAUDE.md / .ko.md
+```
+
+---
+
+## 컨텍스트 비용 관리
+
+| 상황 | 명령 |
+|------|------|
+| 작업 단계 완료 후 | `/compact` |
+| 완전히 다른 작업 시작 | `/clear` |
+| 비용 확인 | `/cost` |
+| 실시간 비용 모니터 | `claude-tools watch` |
+| 환경 상태 확인 | `claude-tools env` |
+| 미완료 작업으로 재개 | `claude-remind \| claude` |
+| 전체 세션 복원 | `claude-handoff load \| claude` |
+
+---
+
+## 트러블슈팅
+
+**에이전트가 `/agents`에 안 보임**
+```bash
+ls ~/.claude/agents/*.md   # 파일 존재 확인 후 Claude Code 재시작
+```
+
+**Agent Teams가 작동 안 함**
+```powershell
+# Windows — "1" 이 출력되어야 함
+[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS","User")
+```
+```bash
+# macOS / Linux
+echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS   # "1" 이 출력되어야 함
+```
+
+**`make install-tools` 후 툴이 없다고 나올 때**
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+```
+
+**Windows에서 `make`가 없을 때**
+```powershell
+winget install GnuWin32.Make
 ```
 
 ---
@@ -403,64 +380,22 @@ Claudecode-Agent/
 |------|--------|---------|
 | 환경 세팅 가이드 | [SETUP.ko.md](docs/SETUP.ko.md) | [SETUP.md](docs/SETUP.md) |
 | 에이전트 치트시트 | [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) | [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) |
-| 통합 가이드 (claw-code + Rust) | [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) | [INTEGRATION.md](docs/INTEGRATION.md) |
+| 통합 가이드 | [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) | [INTEGRATION.md](docs/INTEGRATION.md) |
 | 기여 가이드 | [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md) | [CONTRIBUTING.md](docs/CONTRIBUTING.md) |
 | 코딩 가이드라인 | [CLAUDE.ko.md](docs/CLAUDE.ko.md) | [CLAUDE.md](docs/CLAUDE.md) |
-| README | [README.ko.md](README.ko.md) | [README.md](README.md) |
-
----
-
-## 컨텍스트 비용 관리
-
-| 상황 | 명령 |
-|------|------|
-| 단계 완료 후 | `/compact` |
-| 완전히 다른 작업 시작 | `/clear` |
-| 특정 파일 참조 | `@src/auth.ts 이 파일 리뷰해줘` |
-| 비용 확인 | `/cost` |
-| 다른 터미널에서 실시간 비용 모니터링 | `claude-tools watch` |
-
----
-
-## 트러블슈팅
-
-**에이전트가 `/agents`에 안 보임**
-```bash
-ls ~/.claude/agents/*.md   # 파일이 있는지 확인
-# Claude Code 재시작
-```
-
-**Agent Teams가 작동 안 함**
-```powershell
-# Windows
-[System.Environment]::GetEnvironmentVariable("CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS","User")
-# "1" 이 출력되어야 함
-```
-```bash
-# macOS / Linux
-echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS   # "1" 이 출력되어야 함
-```
-
-**MCP 연결 오류 (-32000)**
-```bash
-docker ps   # GitHub MCP 컨테이너 실행 중인지 확인
-# Claude Code 안에서:
-/mcp        # 재연결
-```
 
 ---
 
 ## 기여하기
 
-기여는 언제나 환영합니다! 먼저 [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md)를 읽어주세요.
+- **새 도구 아이디어** → [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md)
+- **버그 발견** → [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md)
+- **새 스니펫** → `snippets/defaults.json`에 추가 후 PR
 
-- **새 에이전트 아이디어** → [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md) 열기
-- **버그 발견** → [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md) 열기
-- **새 스니펫 아이디어** → `snippets/defaults.json`에 추가 후 PR 보내기
+전체 가이드 → [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md)
 
 ---
 
 ## 라이선스
 
 [MIT](LICENSE)
-

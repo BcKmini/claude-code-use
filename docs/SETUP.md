@@ -17,7 +17,7 @@ Follow these steps in order when setting up a fresh machine or account.
 5. [MCP Servers](#5-mcp-servers)
 6. [Plugins](#6-plugins)
 7. [Config Files](#7-config-files)
-8. [Install Tools (snippet / handoff / cost)](#8-install-tools)
+8. [Install Tools](#8-install-tools)
 9. [claw-code Integration (optional)](#9-claw-code-integration-optional)
 10. [Full Reinstall Checklist](#10-full-reinstall-checklist)
 
@@ -31,14 +31,16 @@ Follow these steps in order when setting up a fresh machine or account.
 | npm | 9+ | `npm -v` |
 | Git | 2.x | `git --version` |
 | Docker | — | `docker --version` *(required for GitHub MCP)* |
+| GNU make | — | `make --version` *(required for Makefile)* |
 
 ```bash
 # macOS
-brew install node
+brew install node make
 # Windows
 winget install OpenJS.NodeJS.LTS
+winget install GnuWin32.Make
 # Linux
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash - && sudo apt-get install -y nodejs make
 ```
 
 ---
@@ -76,7 +78,7 @@ powershell -ExecutionPolicy Bypass -File setup-agents.ps1
 bash setup-agents.sh
 ```
 
-Copies 9 agent files to `~/.claude/agents/`, sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+Copies 9 agent files to `~/.claude/agents/` and sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 
 Verify inside Claude Code:
 ```
@@ -152,6 +154,16 @@ Register in `~/.claude/settings.json` → `enabledPlugins`.
 
 ## 8. Install Tools
 
+### Option A — Makefile (recommended)
+
+```bash
+make install        # agents + slash commands + Python tools
+make install-rust   # optional: Rust binary (requires cargo)
+make status         # verify everything installed correctly
+```
+
+### Option B — Script
+
 ```powershell
 # Windows
 powershell -ExecutionPolicy Bypass -File tools\install-tools.ps1
@@ -162,9 +174,35 @@ powershell -ExecutionPolicy Bypass -File tools\install-tools.ps1
 bash tools/install-tools.sh
 ```
 
-Installs `/snippet`, `/handoff`, `/cost` slash commands + shell functions + 20 default snippets.
+Both install `/snippet`, `/handoff`, `/cost`, `/review-diff`, `/remind` slash commands into `~/.claude/commands/`, plus shell functions and 20 default snippets.
 
-Or build the Rust binary — see [INTEGRATION.md](INTEGRATION.md).
+### Option C — Rust binary only
+
+```bash
+cd rust
+cargo build --release
+cp target/release/claude-tools ~/.local/bin/
+# or: make install-rust
+```
+
+See [INTEGRATION.md](INTEGRATION.md) for full Rust workflow.
+
+### Verify
+
+```bash
+make env
+# or: claude-tools env
+```
+
+Expected output:
+```
+Claude Code Environment
+
+  ✓ ANTHROPIC_API_KEY   sk-ant-…
+  ✓ ~/.claude/           exists
+  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
+```
 
 ---
 
@@ -173,7 +211,6 @@ Or build the Rust binary — see [INTEGRATION.md](INTEGRATION.md).
 > Full guide → [INTEGRATION.md](INTEGRATION.md)
 
 ```bash
-# Install Rust toolchain first
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 git clone https://github.com/ultraworkers/claw-code
@@ -199,6 +236,8 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 [ ] 9.  Plugins & config in ~/.claude/settings.json
 [ ] 10. /agents → 9 agents listed
 [ ] 11. /mcp → MCP connected
-[ ] 12. bash tools/install-tools.sh
-[ ] 13. (Optional) claw doctor health check
+[ ] 12. make install  (or bash tools/install-tools.sh)
+[ ] 13. make env  → all green
+[ ] 14. (Optional) make install-rust → claude-tools env
+[ ] 15. (Optional) claw doctor health check
 ```

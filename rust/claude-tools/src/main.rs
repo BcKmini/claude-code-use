@@ -3,6 +3,7 @@ mod snippet;
 mod handoff;
 mod cost;
 mod watch;
+mod env;
 
 use clap::{Parser, Subcommand};
 
@@ -41,6 +42,8 @@ enum Commands {
         #[arg(long, short, default_value = "2")]
         interval: u64,
     },
+    /// Show Claude Code environment status (API key, agents, sessions, commands)
+    Env,
 }
 
 fn main() {
@@ -50,6 +53,7 @@ fn main() {
         Commands::Handoff { action } => handoff::run(action),
         Commands::Cost    { action } => cost::run(action),
         Commands::Watch   { interval } => watch::run(interval),
+        Commands::Env                  => env::run(),
     };
     if let Err(e) = result {
         eprintln!("[ERROR] {e}");
