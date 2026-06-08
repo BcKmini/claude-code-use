@@ -13,7 +13,8 @@ Thank you for helping improve this project!
 | Bug fix | Open a bug report → submit a PR with the fix |
 | New snippet | Add to `snippets/defaults.json` → PR |
 | New agent | Add `.md` file to `agents/` → update README tables → PR |
-| Documentation | Edit any `.md` file → PR |
+| New tool | Add Python tool to `tools/` + slash command to `.claude/commands/` → PR |
+| Documentation | Edit any `.md` file → PR (update both EN and KO versions) |
 | Translation | Improve `README.md` (EN) or `README.ko.md` (KO) |
 | Feature idea | Open a Feature Request issue first |
 
@@ -25,9 +26,10 @@ Thank you for helping improve this project!
 git clone https://github.com/BcKmini/Claudecode-Agent.git
 cd Claudecode-Agent
 python --version   # 3.8+ required
+make status        # check what's installed
 ```
 
-`snippet.py`, `claude-handoff.py`, `claude-cost.py` use only the Python standard library — no `pip install` needed.
+`snippet.py`, `claude-handoff.py`, `claude-cost.py`, `claude-review-diff.py`, `claude-remind.py` all use only the Python standard library — no `pip install` needed.
 
 For the Rust binary:
 
@@ -72,6 +74,20 @@ python tools/snippet.py run my-snippet --dry-run
 
 ---
 
+## Adding a New Tool
+
+1. Add `tools/claude-<name>.py` following the style of existing tools
+   - stdlib only, no external deps
+   - Python 3.8+ compatible
+   - Respect `NO_COLOR` environment variable
+2. Add `.claude/commands/<name>.md` slash command doc
+3. Add the tool to `Makefile` → `install-tools` target and `status` target
+4. If adding a Rust implementation, add `rust/claude-tools/src/<name>.rs` and wire it into `main.rs`
+5. Update `README.md` and `README.ko.md` tool sections, slash command table, and repo layout
+6. Update `docs/AGENT-CHEATSHEET.md` and `docs/AGENT-CHEATSHEET.ko.md`
+
+---
+
 ## Code Style
 
 ### Python tools
@@ -85,6 +101,7 @@ python tools/snippet.py run my-snippet --dry-run
 - `cargo check` must pass with no errors
 - Minimize `cargo clippy` warnings
 - New subcommands follow the pattern of existing modules in `rust/claude-tools/src/`
+- Use `crate::colors` functions (`green()`, `red()`, etc.) for colored output
 
 ---
 
@@ -94,8 +111,11 @@ python tools/snippet.py run my-snippet --dry-run
 - [ ] All existing commands still work
 - [ ] `snippet import snippets/defaults.json` still works
 - [ ] `cargo check` passes (Rust changes)
-- [ ] README tables updated if new snippets / agents added
-- [ ] Both EN and KO docs updated where applicable
+- [ ] `make test` passes
+- [ ] README tables updated if new snippets / agents / tools added
+- [ ] **Both EN and KO docs updated** (README, CHEATSHEET, SETUP, INTEGRATION as applicable)
+- [ ] Slash command `.md` added if new tool introduced
+- [ ] `Makefile` updated if new tool added
 - [ ] No new external dependencies introduced
 
 ---
