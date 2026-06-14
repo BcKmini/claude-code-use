@@ -4,17 +4,18 @@
 
 # Claude Code Multi-Agent System
 
-**9 specialized AI agents + 5 productivity tools — all for Claude Code**
+**11 specialized AI agents + 7 productivity tools — all for Claude Code**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/Claudecode-Agent)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
-[![Agents](https://img.shields.io/badge/Agents-9-green?style=flat-square)](#agent-roster)
-[![Tools](https://img.shields.io/badge/Tools-5-informational?style=flat-square)](#tools)
+[![Agents](https://img.shields.io/badge/Agents-11-green?style=flat-square)](#agent-roster)
+[![Tools](https://img.shields.io/badge/Tools-7-informational?style=flat-square)](#tools)
+[![Bilingual](https://img.shields.io/badge/Lang-EN%20%7C%20KO-orange?style=flat-square)](#)
 
-**[한국어 README](README.ko.md)** · **[Setup Guide](docs/SETUP.md)** · **[Cheatsheet](docs/AGENT-CHEATSHEET.md)** · **[Integration](docs/INTEGRATION.md)** · **[Contributing](docs/CONTRIBUTING.md)**
+**[한국어 README](README.ko.md)** · **[Setup Guide](docs/SETUP.md)** · **[Cheatsheet](docs/AGENT-CHEATSHEET.md)** · **[Harness Guide](docs/HARNESS-GUIDE.md)** · **[Integration](docs/INTEGRATION.md)** · **[Contributing](docs/CONTRIBUTING.md)**
 
 </div>
 
@@ -24,14 +25,18 @@
 
 A drop-in enhancement for **Claude Code** that gives you:
 
-1. **9 specialized sub-agents** — each laser-focused on one job (design, code, review, test, security…)
+1. **11 specialized sub-agents** — each laser-focused on one job (design, code, review, test, security, harness design, pipeline orchestration…)
 2. **`snippet`** — personal prompt manager; your best prompts one command away
 3. **`claude-handoff`** — save full session context and resume it in the next conversation
 4. **`claude-cost`** — estimate and track Claude API spend before you run a prompt
 5. **`claude-review-diff`** — generate a structured code review prompt from your git diff
 6. **`claude-remind`** — surface incomplete TODO items at session start
+7. **`claude-harness`** — validate and generate AI harness definitions for specialist agents
+8. **`claude-pipeline`** — track multi-stage pipeline execution with quality gates and run reports
 
-All tools ship as Python CLIs, as Claude Code slash commands, and as a single compiled **Rust binary** (`claude-tools`).
+All tools ship as Python CLIs and as Claude Code slash commands. The core tools also ship as a single compiled **Rust binary** (`claude-tools`).
+
+> **Bilingual:** All agents respond in the user's language — English and Korean (한국어) both fully supported.
 
 ```
 You                     Orchestrator
@@ -100,10 +105,14 @@ claude
 | 06 | **performance-optimizer** | Sonnet | Bottleneck analysis and optimization |
 | 07 | **database-expert** | Sonnet | Schema design, queries, migrations |
 | 08 | **documenter** | Haiku | README, API docs, inline comments |
+| 09 | **harness-designer** | Opus | Designs tight/loose/adaptive AI harnesses for automation |
+| 10 | **pipeline-orchestrator** | Opus | Manages multi-stage pipelines with context isolation |
+
+> **All agents are bilingual** — they detect the user's language and respond in English or Korean (한국어).
 
 > Each agent carries only the context relevant to its role. Parallel execution (planner + security-auditor simultaneously) cuts wall-clock time.
 
-> See [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) for 20+ ready-to-use prompts.
+> See [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) for 24+ ready-to-use prompts.
 
 ---
 
@@ -120,6 +129,8 @@ Five productivity tools that fill the gaps Claude Code doesn't cover out of the 
 | `/cost` | Estimate and track API spend |
 | `/review-diff` | Code review prompt from current git diff |
 | `/remind` | Surface pending TODO items at session start |
+| `/harness` | Design and validate AI harness definitions |
+| `/pipeline` | Run and track multi-stage AI pipelines |
 
 ---
 
@@ -242,6 +253,55 @@ claude-handoff load | claude   # full context restore
 
 ---
 
+### Tool 6 — `claude-harness` — Harness Validator & Template Generator
+
+Validate agent harness definitions and generate harness templates from the command line.
+
+```bash
+claude-harness check-all                         # validate all agents in agents/
+claude-harness validate agents/09-harness-designer.md   # validate one agent
+claude-harness template tight my-specialist      # print a tight harness template
+claude-harness template adaptive my-orchestrator # print an adaptive harness template
+```
+
+```
+/harness design automate slow query detection and patching
+/harness validate agents/03-reviewer.md
+/harness types
+```
+
+**Checks performed on each agent:**
+- Role is clearly scoped
+- Output format is constrained
+- Forbidden actions are listed
+- Tools list is minimal
+- Bilingual language support present
+
+---
+
+### Tool 7 — `claude-pipeline` — Pipeline Tracker & Reporter
+
+Track multi-stage AI pipeline execution, log stage results, and generate Markdown run reports.
+
+```bash
+claude-pipeline init slow-query-fix              # create and activate pipeline
+claude-pipeline stage "detection" start
+claude-pipeline stage "detection" pass --note "found 3 slow queries"
+claude-pipeline stage "patch-gen" start
+claude-pipeline stage "patch-gen" warn --note "1 query had no safe fix"
+claude-pipeline status                           # show live status
+claude-pipeline report                           # markdown run report
+claude-pipeline list                             # all saved pipelines
+```
+
+```
+/pipeline run analyze slow queries and generate patches with review loop
+/pipeline status
+/pipeline stages
+```
+
+---
+
 ### Rust binary — `claude-tools`
 
 All tools compiled into one zero-dependency binary — no Python required.
@@ -307,14 +367,18 @@ Claudecode-Agent/
 │   ├── 05-security-auditor.md
 │   ├── 06-performance-optimizer.md
 │   ├── 07-database-expert.md
-│   └── 08-documenter.md
+│   ├── 08-documenter.md
+│   ├── 09-harness-designer.md        ← NEW harness architect
+│   └── 10-pipeline-orchestrator.md  ← NEW pipeline manager
 │
 ├── .claude/commands/                 ← slash commands → ~/.claude/commands/
 │   ├── snippet.md
 │   ├── handoff.md
 │   ├── cost.md
-│   ├── review-diff.md                ← NEW /review-diff
-│   └── remind.md                     ← NEW /remind
+│   ├── review-diff.md
+│   ├── remind.md
+│   ├── harness.md                    ← NEW /harness
+│   └── pipeline.md                   ← NEW /pipeline
 │
 ├── snippets/
 │   └── defaults.json                 ← 20 built-in prompt templates
@@ -323,8 +387,10 @@ Claudecode-Agent/
 │   ├── snippet.py                    ← prompt manager CLI
 │   ├── claude-handoff.py             ← session continuity CLI
 │   ├── claude-cost.py                ← cost estimator CLI
-│   ├── claude-review-diff.py         ← NEW code review from diff CLI
-│   ├── claude-remind.py              ← NEW session reminder CLI
+│   ├── claude-review-diff.py
+│   ├── claude-remind.py
+│   ├── claude-harness.py             ← NEW harness validator + template gen
+│   ├── claude-pipeline.py            ← NEW pipeline tracker + reporter
 │   ├── install-tools.ps1             ← Windows tool installer
 │   └── install-tools.sh              ← macOS/Linux tool installer
 │
@@ -340,6 +406,7 @@ Claudecode-Agent/
 └── docs/
     ├── SETUP.md / SETUP.ko.md
     ├── AGENT-CHEATSHEET.md / .ko.md
+    ├── HARNESS-GUIDE.md / .ko.md      ← NEW harness design guide
     ├── INTEGRATION.md / .ko.md
     ├── CONTRIBUTING.md / .ko.md
     └── CLAUDE.md / .ko.md

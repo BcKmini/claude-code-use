@@ -71,6 +71,77 @@ Make it clear enough for a new developer to onboard in 30 minutes.
 
 ---
 
+## Harness Design & Pipeline (New)
+
+### Design an AI Harness for a Workflow
+```
+Have harness-designer design a tight harness for the following task.
+
+Task: [describe the automation task]
+Domain: [e.g., Spring Boot/JPA, Python/FastAPI]
+Expected output format: [e.g., unified diff, JSON report]
+
+Deliver: specialist definitions, pipeline stages, context isolation plan,
+human oversight checkpoints, token cost estimate.
+```
+
+### Run a Multi-Stage Pipeline
+```
+Have pipeline-orchestrator plan and execute a pipeline for:
+[describe the workflow]
+
+Use context isolation between stages.
+Run independent stages in parallel.
+Apply quality gates at every stage.
+Produce a run report at the end.
+```
+
+### Context Isolation — Parallel Reconnaissance
+```
+Redesign this analysis to use parallel context-isolated agents:
+
+Current: one agent reads everything and produces one report
+Target: 4 agents, each answering ONE question in an isolated context
+
+Questions to answer in parallel:
+1. [question 1]
+2. [question 2]
+3. [question 3]
+4. [question 4]
+
+Then synthesize all 4 answers in a final stage.
+```
+
+### Multi-Perspective Review Loop
+```
+Set up a review loop for [artifact/file/diff].
+
+Perspectives:
+1. Correctness (logic errors, edge cases)
+2. Security (OWASP top 10, injection, auth)
+3. Performance (N+1 queries, missing index, O(n²))
+4. Style (naming, complexity, maintainability)
+
+Max iterations: 3
+Early exit if: no new findings or no improvement vs. previous round.
+```
+
+### Validate All Agent Harnesses
+```bash
+claude-harness check-all   # validate all agents in agents/
+```
+
+### Pipeline Tracking Workflow
+```bash
+claude-pipeline init my-workflow
+claude-pipeline stage "analysis" start
+claude-pipeline stage "analysis" pass --note "found issues"
+claude-pipeline stage "patch-gen" start
+claude-pipeline report     # markdown run report
+```
+
+---
+
 ## Parallel Execution (Save Time)
 
 ```
@@ -122,6 +193,10 @@ claude --agent reviewer "re-check src/auth after implementer changes"
 | `/review-diff --base main` | Compare branch to main | `/review-diff --base main` |
 | `/remind` | Show pending TODO items | `/remind` |
 | `/remind --quiet` | Count only | `/remind --quiet` |
+| `/harness design` | Design an AI harness | `/harness design automate slow query analysis` |
+| `/harness validate` | Validate agent harness | `/harness validate agents/03-reviewer.md` |
+| `/pipeline run` | Run a multi-stage pipeline | `/pipeline run analyze and patch slow queries` |
+| `/pipeline status` | Show pipeline run status | `/pipeline status` |
 
 ---
 
@@ -156,7 +231,8 @@ claude-handoff load | claude    # full git context restore
 ## Per-Agent Models & Cost
 
 ```
-Opus   -> orchestrator, planner, security-auditor   (complex reasoning)
+Opus   -> orchestrator, planner, security-auditor,   (complex reasoning)
+          harness-designer, pipeline-orchestrator
 Sonnet -> implementer, reviewer, tester,             (execution-focused)
           performance-optimizer, database-expert
 Haiku  -> documenter                                 (simple/repetitive, lowest cost)

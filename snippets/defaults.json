@@ -118,5 +118,29 @@
     "tags": ["meta", "cost"],
     "created": "2026-06-05",
     "uses": 0
+  },
+  "harness-design": {
+    "prompt": "Have harness-designer design a tight harness for the following automation task.\n\nTask: {{TASK_DESCRIPTION}}\nDomain: {{DOMAIN}}\nExpected output format: {{OUTPUT_FORMAT}}\n\nDeliver:\n1. Harness type recommendation (tight / loose / adaptive) with reasoning\n2. Specialist agent definitions (persona, input contract, output contract, forbidden actions)\n3. Pipeline stage map with validators\n4. Context isolation strategy\n5. Human oversight checkpoints\n6. Estimated token cost per pipeline run",
+    "tags": ["harness", "pipeline", "ai-design"],
+    "created": "2026-06-15",
+    "uses": 0
+  },
+  "pipeline-plan": {
+    "prompt": "Have pipeline-orchestrator plan and execute a multi-stage pipeline for the following workflow.\n\nWorkflow: {{WORKFLOW_DESCRIPTION}}\nInput: {{INPUT}}\nExpected output: {{OUTPUT}}\n\nRequirements:\n- Use context isolation between stages\n- Run independent stages in parallel\n- Apply quality gates at every stage\n- Produce a run report at the end\n- Identify all human oversight checkpoints",
+    "tags": ["pipeline", "orchestrator", "automation"],
+    "created": "2026-06-15",
+    "uses": 0
+  },
+  "context-isolation": {
+    "prompt": "Redesign the following agent or workflow to use strict context isolation.\n\nCurrent setup: {{CURRENT_SETUP}}\nProblem: {{PROBLEM}}\n\nApply the parallel reconnaissance pattern:\n1. Split the task into N independent sub-questions\n2. Assign each to a separate agent with only the context it needs\n3. Collect all outputs\n4. Synthesize in a final stage\n\nShow the before/after structure and explain how this prevents Context Rot.",
+    "tags": ["harness", "context-isolation", "parallel"],
+    "created": "2026-06-15",
+    "uses": 0
+  },
+  "review-loop": {
+    "prompt": "Set up a multi-perspective review loop for the following artifact.\n\nArtifact: {{ARTIFACT_DESCRIPTION}}\nReview perspectives: {{PERSPECTIVES}}\nMax iterations: {{MAX_ITER}}\n\nFor each round:\n1. Run all review agents in parallel (isolated contexts)\n2. Merge and deduplicate findings\n3. Apply fixes\n4. Check if all findings are resolved\n\nEarly exit if no improvement vs. previous round. Report final result.",
+    "tags": ["review", "pipeline", "parallel"],
+    "created": "2026-06-15",
+    "uses": 0
   }
 }

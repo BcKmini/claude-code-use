@@ -95,3 +95,8 @@ echo
 echo -e "${YELLOW}사용 예시:${NC}"
 echo -e "  ${GRAY}> Use the orchestrator to add OAuth login${NC}"
 echo -e "  ${GRAY}> Have reviewer check src/auth/login.ts${NC}"
+echo -e "  ${GRAY}> Have harness-designer design a pipeline for [task]${NC}"
+echo -e "  ${GRAY}> /pipeline run analyze and patch slow queries${NC}"
+echo
+echo -e "${YELLOW}도구 설치 (선택):${NC}"
+echo -e "  ${GRAY}make install-tools   # Python 도구 설치 (harness, pipeline 포함)${NC}"

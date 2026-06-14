@@ -55,6 +55,11 @@ Write-Host "📋 다음 단계:" -ForegroundColor Yellow
 Write-Host "  1. claude 실행 후 /agents 명령으로 확인" -ForegroundColor White
 Write-Host "  2. CLAUDE.md를 프로젝트에 맞게 수정" -ForegroundColor White
 Write-Host ""
-Write-Host "💡 사용 예시:" -ForegroundColor Yellow
+Write-Host "Usage examples:" -ForegroundColor Yellow
 Write-Host "  > Use the orchestrator to add OAuth login" -ForegroundColor Gray
 Write-Host "  > Have reviewer check src/auth/login.ts" -ForegroundColor Gray
+Write-Host "  > Have harness-designer design a pipeline for [task]" -ForegroundColor Gray
+Write-Host "  > /pipeline run analyze and patch slow queries" -ForegroundColor Gray
+Write-Host ""
+Write-Host "Optional — install Python tools (includes harness + pipeline):" -ForegroundColor Yellow
+Write-Host "  make install-tools" -ForegroundColor Gray
