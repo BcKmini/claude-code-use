@@ -30,9 +30,26 @@ Output in Markdown format:
 ## Implementation Plan
 
 ### Scope of Impact (영향 범위)
-- Files to modify: [list]
+- Files to modify: [list — specific functions/sections only, not whole files]
 - New files: [list]
 - Critical dependencies: [list]
+
+### Do Not Touch (절대 건드리지 말 것) ← implementer must respect this
+- Files: [files that are read-only for this task]
+- Functions/sections: [specific functions within modified files that must not change]
+- Formatting: preserve existing style — no reformatting of untouched code
+
+### Surgical Scope per Implementer Task (작업별 수정 범위)
+> Rule: if this plan touches more than 3 files, split into separate sequential tasks.
+> Each task gets its own scope boundary below.
+
+Task A: [name]
+- File: [path] — modify only: [function/class/line range]
+- New lines estimate: < [N] lines
+
+Task B: [name]  ← split into separate implementer call if independent
+- File: [path] — modify only: [function/class/line range]
+- New lines estimate: < [N] lines
 
 ### Step-by-step Implementation Order (단계별 구현 순서)
 1. [Step 1]: reason
@@ -46,8 +63,8 @@ Output in Markdown format:
 - [ ] Case 2: mitigation approach
 
 ### Checklist for implementer
-- [ ] Task 1
-- [ ] Task 2
+- [ ] Task 1 — scope: [file:function]
+- [ ] Task 2 — scope: [file:function]
 ```
 
 ---

@@ -19,6 +19,19 @@ Praise good code. Flag problems with clear direction for fixes.
 
 ## Review Checklist (리뷰 체크리스트)
 
+### DIFF QUALITY (PR 가독성 — check this first)
+> Based on Google/Stripe engineering: a diff reviewable in < 5 min ships 60% faster.
+
+- [ ] **Surgical scope**: only the requested function(s)/lines were changed — nothing adjacent
+- [ ] **No format noise**: no reformatting, reindenting, or quote-style changes in untouched code
+- [ ] **No scope creep**: no renames, reorders, or "while I was here" cleanup outside the task
+- [ ] **Edit not Write**: existing files were modified with targeted edits, not full rewrites
+- [ ] **Reviewable size**: total diff under 200 lines (bug fix < 30, feature < 150)
+
+If any DIFF QUALITY item fails → flag as **DIFF_BLOAT** and request a surgical re-implementation before reviewing correctness. A bloated diff hides real bugs.
+
+---
+
 ### CRITICAL (fix immediately / 즉시 수정 필수)
 - [ ] Runtime error risk (null dereference, array out of bounds)
 - [ ] Infinite loop / deadlock possibility
@@ -48,6 +61,9 @@ Praise good code. Flag problems with clear direction for fixes.
 ```markdown
 ## Code Review Result
 
+### DIFF QUALITY
+- CLEAN / DIFF_BLOAT: [description if bloated]
+
 ### CRITICAL (N items)
 [filename:line] Problem description
 -> Fix direction: specific solution
@@ -62,7 +78,7 @@ Praise good code. Flag problems with clear direction for fixes.
 Note well-done parts
 
 ### Final Verdict (최종 판정)
-- APPROVE / REQUEST_CHANGES / COMMENT
+- APPROVE / REQUEST_CHANGES / COMMENT / DIFF_BLOAT (re-implement surgically first)
 ```
 
 ---
