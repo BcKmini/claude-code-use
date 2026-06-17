@@ -240,6 +240,64 @@ Haiku  -> documenter                                 (simple/repetitive, lowest 
 
 ---
 
+## Surgical Code Changes (PR 가독성 최적화)
+
+> These prompts enforce minimal diffs so PRs are fast to review.
+> Based on Google/Stripe/Anthropic best practices: reviewable diffs ship 60% faster.
+
+### Fix only one function
+```
+Have implementer fix ONLY the [function_name] function in [file path].
+Do NOT modify any other functions, imports, or formatting in that file.
+Use Edit tool — do not rewrite the whole file.
+Diff target: under 30 lines changed.
+```
+
+### Minimal patch — bug fix
+```
+Bug is in [file:function_name].
+Have implementer change ONLY what's necessary to fix this bug.
+Constraint: diff must stay under 30 lines.
+If broader refactoring would help but isn't strictly needed, list it separately — don't apply it now.
+```
+
+### Add a feature without touching existing code
+```
+Have implementer add [feature] to [file].
+Scope boundary: new code only — do not reformat, rename, or reorganize existing code.
+Existing functions must be left exactly as they are unless the feature requires changing them.
+```
+
+### Split a large change into atomic PRs
+```
+This change affects [N] files. Have orchestrator split into separate atomic implementer tasks:
+Task 1: [change description] — files: [A, B only]
+Task 2: [change description] — file: [C only]
+Task 3: [change description] — file: [D only]
+Each task should produce a diff under 150 lines.
+Call implementer once per task, sequentially.
+```
+
+### Request a diff review before applying
+```
+Before implementing, have planner output:
+1. Exact files to modify (with function names and line ranges)
+2. Explicit "Do Not Touch" list
+3. Estimated lines changed per file
+I will approve the scope before implementer starts.
+```
+
+### Reviewer: check diff quality first
+```
+Have reviewer check [file or branch diff] for diff quality BEFORE correctness:
+- Were only the requested functions/lines changed?
+- Any formatting or rename noise?
+- Total diff under 200 lines?
+Flag DIFF_BLOAT if the scope is wider than the task required.
+```
+
+---
+
 ## Troubleshooting
 
 **Agents not showing**
@@ -252,6 +310,14 @@ Check that `.md` files exist in `~/.claude/agents/`.
 ```
 Have reviewer ONLY review src/auth.ts.
 Do NOT suggest changes to other files.
+```
+
+**Implementer rewrote the whole file instead of editing it**
+```
+Revert the change. Then:
+Have implementer re-implement using Edit tool only.
+Scope: modify ONLY [function_name] at [file:line_start–line_end].
+Do not use Write on an existing file.
 ```
 
 **Check full environment**

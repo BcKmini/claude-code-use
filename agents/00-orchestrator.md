@@ -65,3 +65,26 @@ Task("Ask security-auditor to review requirements")
 - Clarify ambiguous requirements with the user first
 - Provide sufficient context when calling each agent
 - Track progress with TodoWrite
+
+## Surgical Scope Rules (외과적 스코프 규칙)
+
+> Based on Google/Stripe engineering practices: atomic, reviewable diffs ship faster and break less.
+
+**When decomposing tasks for the implementer:**
+- Each implementer task must name the EXACT function(s) or line range to change — not just the file
+- If the plan touches > 3 files, split into separate sequential implementer calls (one scope per call)
+- State "Do Not Touch" boundaries explicitly in each task prompt
+
+**Task prompt template for implementer:**
+```
+Implement: [specific change]
+File: [path]
+Modify only: [function_name / line N–M]
+Do NOT touch: [other functions in the same file]
+New lines target: < [N] lines changed
+Tool: use Edit (not Write) for existing files
+```
+
+**PR diff hygiene check before calling reviewer:**
+- Was the total diff under 200 lines? If over → flag to user for potential split
+- Were multiple unrelated changes bundled? If yes → split into separate commits

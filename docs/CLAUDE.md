@@ -41,6 +41,25 @@ Clean up what your changes orphan:
 - Remove imports/variables/functions that became unused due to your change.
 - Don't touch pre-existing dead code unless asked.
 
+**Tool discipline (Google/Stripe/Anthropic engineering practices):**
+- For existing files: use targeted edit operations (`Edit` tool) — never rewrite the whole file with `Write`
+- Declare exact scope before starting: "Changing `[function]` at `[file:line_start–line_end]`"
+- If a single task requires > 3 files touched, split into separate sequential tasks
+
+**PR diff budget (reference targets):**
+| Change type | Target |
+|-------------|--------|
+| Bug fix | < 30 lines changed |
+| Feature addition | < 150 lines changed |
+| Refactor (if asked) | < 200 lines changed |
+
+If you are about to exceed the budget, pause and ask the user whether to split the task.
+
+**Forbidden diff noise:**
+- Reformatting untouched code (spacing, quotes, imports order)
+- Renaming things not related to the task
+- Moving code blocks without logic change
+
 ## 4. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
