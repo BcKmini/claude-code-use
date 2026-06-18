@@ -33,14 +33,16 @@ struct GitInfo {
 
 fn git_info() -> GitInfo {
     GitInfo {
-        branch:    run_git(&["rev-parse", "--abbrev-ref", "HEAD"]).unwrap_or_else(|| "unknown".into()),
-        log:       run_git(&["log", "--oneline", "-5"]).unwrap_or_else(|| "(no commits)".into()),
-        status:    run_git(&["status", "--short"]).unwrap_or_else(|| "(clean)".into()),
+        branch: run_git(&["rev-parse", "--abbrev-ref", "HEAD"]).unwrap_or_else(|| "unknown".into()),
+        log: run_git(&["log", "--oneline", "-5"]).unwrap_or_else(|| "(no commits)".into()),
+        status: run_git(&["status", "--short"]).unwrap_or_else(|| "(clean)".into()),
         diff_stat: run_git(&["diff", "--stat", "HEAD"]).unwrap_or_default(),
-        remote:    run_git(&["remote", "get-url", "origin"]).unwrap_or_else(|| "(none)".into()),
-        root:      run_git(&["rev-parse", "--show-toplevel"]).unwrap_or_else(|| std::env::current_dir()
-            .map(|p| p.display().to_string())
-            .unwrap_or_else(|_| "(unknown)".into())),
+        remote: run_git(&["remote", "get-url", "origin"]).unwrap_or_else(|| "(none)".into()),
+        root: run_git(&["rev-parse", "--show-toplevel"]).unwrap_or_else(|| {
+            std::env::current_dir()
+                .map(|p| p.display().to_string())
+                .unwrap_or_else(|_| "(unknown)".into())
+        }),
     }
 }
 
@@ -53,7 +55,9 @@ fn find_todo() -> Option<String> {
                 return std::fs::read_to_string(p).ok();
             }
         }
-        if !dir.pop() { break; }
+        if !dir.pop() {
+            break;
+        }
     }
     None
 }
@@ -118,24 +122,30 @@ fn build_doc(note: Option<&str>, git: &GitInfo) -> String {
 pub enum HandoffCmd {
     /// Save a handoff document for the current session
     Save {
-        #[arg(long, short)] note: Option<String>,
+        #[arg(long, short)]
+        note: Option<String>,
     },
     /// Print the most recent handoff document to stdout
     Load {
-        #[arg(long)] id: Option<String>,
+        #[arg(long)]
+        id: Option<String>,
     },
     /// List saved handoff documents
     List {
-        #[arg(long, default_value = "10")] limit: usize,
+        #[arg(long, default_value = "10")]
+        limit: usize,
     },
     /// Show a specific handoff document
     Show {
-        #[arg(long)] id: Option<String>,
+        #[arg(long)]
+        id: Option<String>,
     },
     /// Delete old handoff documents
     Clean {
-        #[arg(long, default_value = "30")] days: i64,
-        #[arg(long)] force: bool,
+        #[arg(long, default_value = "30")]
+        days: i64,
+        #[arg(long)]
+        force: bool,
     },
     /// Print version
     Version,
@@ -227,7 +237,8 @@ fn list_handoffs() -> Result<Vec<(String, PathBuf)>> {
         .filter(|e| e.path().extension().map(|x| x == "md").unwrap_or(false))
         .map(|e| {
             let path = e.path();
-            let id = path.file_stem()
+            let id = path
+                .file_stem()
                 .map(|s| s.to_string_lossy().into_owned())
                 .unwrap_or_default();
             (id, path)
@@ -247,7 +258,9 @@ fn resolve_handoff(id: Option<String>) -> Result<PathBuf> {
         return Ok(path);
     }
     let entries = list_handoffs()?;
-    entries.into_iter().next()
+    entries
+        .into_iter()
+        .next()
         .map(|(_, path)| path)
         .context("No handoff documents found. Run 'handoff save' first.")
 }

@@ -1,9 +1,9 @@
 mod colors;
-mod snippet;
-mod handoff;
 mod cost;
-mod watch;
 mod env;
+mod handoff;
+mod snippet;
+mod watch;
 
 use clap::{Parser, Subcommand};
 
@@ -51,9 +51,9 @@ fn main() {
     let result = match cli.command {
         Commands::Snippet { action } => snippet::run(action),
         Commands::Handoff { action } => handoff::run(action),
-        Commands::Cost    { action } => cost::run(action),
-        Commands::Watch   { interval } => watch::run(interval),
-        Commands::Env                  => env::run(),
+        Commands::Cost { action } => cost::run(action),
+        Commands::Watch { interval } => watch::run(interval),
+        Commands::Env => env::run(),
     };
     if let Err(e) = result {
         eprintln!("[ERROR] {e}");

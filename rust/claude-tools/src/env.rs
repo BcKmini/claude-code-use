@@ -57,8 +57,15 @@ fn check_agents() {
     match std::fs::read_dir(&agents_dir) {
         Ok(entries) => {
             let count = entries.filter_map(|e| e.ok()).count();
-            let marker = if count >= 5 { green("✓") } else { yellow("!") };
-            println!("  {} ~/.claude/agents/    {} agents installed", marker, count);
+            let marker = if count >= 5 {
+                green("✓")
+            } else {
+                yellow("!")
+            };
+            println!(
+                "  {} ~/.claude/agents/    {} agents installed",
+                marker, count
+            );
         }
         Err(_) => {
             println!(
@@ -120,7 +127,7 @@ fn check_handoffs() {
                     "  {} handoffs             {} saved, latest: {}",
                     green("✓"),
                     files.len(),
-                    dim(&latest.file_name().to_string_lossy().into_owned())
+                    dim(&latest.file_name().to_string_lossy())
                 );
             } else {
                 println!("  {} handoffs             none saved yet", cyan("–"));
@@ -145,9 +152,7 @@ fn check_sessions() {
                 if let Ok(files) = std::fs::read_dir(dir.path()) {
                     session_count += files
                         .filter_map(|e| e.ok())
-                        .filter(|e| {
-                            e.path().extension().map(|x| x == "jsonl").unwrap_or(false)
-                        })
+                        .filter(|e| e.path().extension().map(|x| x == "jsonl").unwrap_or(false))
                         .count();
                 }
             }
