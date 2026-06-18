@@ -8,7 +8,10 @@ use std::path::PathBuf;
 use crate::colors::*;
 
 fn snippets_file() -> PathBuf {
-    dirs::home_dir().unwrap().join(".claude").join("snippets.json")
+    dirs::home_dir()
+        .unwrap()
+        .join(".claude")
+        .join("snippets.json")
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
@@ -30,8 +33,8 @@ fn load() -> Result<HashMap<String, Snippet>> {
         return Ok(HashMap::new());
     }
     let text = std::fs::read_to_string(&path)?;
-    let map: HashMap<String, Snippet> = serde_json::from_str(&text)
-        .context("Failed to parse snippets.json")?;
+    let map: HashMap<String, Snippet> =
+        serde_json::from_str(&text).context("Failed to parse snippets.json")?;
     Ok(map)
 }
 
@@ -69,20 +72,25 @@ fn fill_vars(prompt: &str, vars: &[(String, String)]) -> (String, Vec<String>) {
 pub enum SnippetCmd {
     /// List all snippets
     List {
-        #[arg(long)] tag: Option<String>,
+        #[arg(long)]
+        tag: Option<String>,
     },
     /// Save a snippet
     Save {
         name: String,
         prompt: String,
-        #[arg(long, value_delimiter = ',')] tags: Vec<String>,
-        #[arg(long)] force: bool,
+        #[arg(long, value_delimiter = ',')]
+        tags: Vec<String>,
+        #[arg(long)]
+        force: bool,
     },
     /// Print a snippet (with variable substitution)
     Run {
         name: String,
-        #[arg(long, value_parser = parse_key_val)] var: Vec<(String, String)>,
-        #[arg(long)] dry_run: bool,
+        #[arg(long, value_parser = parse_key_val)]
+        var: Vec<(String, String)>,
+        #[arg(long)]
+        dry_run: bool,
     },
     /// Show a snippet's raw prompt
     Show { name: String },
@@ -90,12 +98,14 @@ pub enum SnippetCmd {
     #[command(alias = "rm")]
     Delete {
         name: String,
-        #[arg(long)] force: bool,
+        #[arg(long)]
+        force: bool,
     },
     /// Search snippets by keyword
     Search {
         query: String,
-        #[arg(long)] tag: Option<String>,
+        #[arg(long)]
+        tag: Option<String>,
     },
     /// List all tags
     Tags,
@@ -103,19 +113,22 @@ pub enum SnippetCmd {
     Cp {
         src: String,
         dst: String,
-        #[arg(long)] force: bool,
+        #[arg(long)]
+        force: bool,
     },
     /// Show stats
     Stats,
     /// Import snippets from a JSON file
     Import {
         file: String,
-        #[arg(long)] overwrite: bool,
+        #[arg(long)]
+        overwrite: bool,
     },
     /// Export snippets to a JSON file
     Export {
         file: String,
-        #[arg(long)] tag: Option<String>,
+        #[arg(long)]
+        tag: Option<String>,
     },
     /// Print version
     Version,
@@ -146,38 +159,55 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
                 println!("No snippets found.");
                 return Ok(());
             }
-            println!("{}", bold(&format!("{:<20} {:<30} {}", "NAME", "TAGS", "VARS")));
+            println!(
+                "{}",
+                bold(&format!("{:<20} {:<30} {}", "NAME", "TAGS", "VARS"))
+            );
             println!("{}", "-".repeat(60));
             let re = Regex::new(r"\{\{(\w+)\}\}").unwrap();
             for (name, snip) in &entries {
                 let tags = snip.tags.join(",");
-                let vars: Vec<_> = re.captures_iter(&snip.prompt)
+                let vars: Vec<_> = re
+                    .captures_iter(&snip.prompt)
                     .map(|c| c[1].to_string())
                     .collect::<std::collections::HashSet<_>>()
                     .into_iter()
                     .collect();
-                println!("{:<20} {:<30} {}",
+                println!(
+                    "{:<20} {:<30} {}",
                     cyan(name),
                     dim(&tags),
-                    yellow(&vars.join(",")));
+                    yellow(&vars.join(","))
+                );
             }
             println!("\n{} snippet(s)", entries.len());
         }
 
-        SnippetCmd::Save { name, prompt, tags, force } => {
+        SnippetCmd::Save {
+            name,
+            prompt,
+            tags,
+            force,
+        } => {
             let mut map = load()?;
             if map.contains_key(&name) && !force {
-                bail!("Snippet '{}' already exists. Use --force to overwrite.", name);
+                bail!(
+                    "Snippet '{}' already exists. Use --force to overwrite.",
+                    name
+                );
             }
             let now = now_str();
             let existing = map.remove(&name);
-            map.insert(name.clone(), Snippet {
-                prompt,
-                tags,
-                created: existing.map(|s| s.created).unwrap_or_else(|| now.clone()),
-                updated: now,
-                use_count: 0,
-            });
+            map.insert(
+                name.clone(),
+                Snippet {
+                    prompt,
+                    tags,
+                    created: existing.map(|s| s.created).unwrap_or_else(|| now.clone()),
+                    updated: now,
+                    use_count: 0,
+                },
+            );
             save(&map)?;
             println!("{} Saved snippet '{}'", green("[OK]"), name);
         }
@@ -192,10 +222,16 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
 
         SnippetCmd::Run { name, var, dry_run } => {
             let mut map = load()?;
-            let snip = map.get(&name).context(format!("Snippet '{}' not found.", name))?;
+            let snip = map
+                .get(&name)
+                .context(format!("Snippet '{}' not found.", name))?;
             let (filled, missing) = fill_vars(&snip.prompt, &var);
             if !missing.is_empty() {
-                eprintln!("{} Missing variables: {}", yellow("[WARN]"), missing.join(", "));
+                eprintln!(
+                    "{} Missing variables: {}",
+                    yellow("[WARN]"),
+                    missing.join(", ")
+                );
             }
             if dry_run {
                 println!("{}", dim("--- DRY RUN ---"));
@@ -225,13 +261,12 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
         SnippetCmd::Search { query, tag } => {
             let map = load()?;
             let q = query.to_lowercase();
-            let mut results: Vec<(&String, &Snippet)> = map.iter()
+            let mut results: Vec<(&String, &Snippet)> = map
+                .iter()
                 .filter(|(name, snip)| {
                     let name_match = name.to_lowercase().contains(&q);
                     let prompt_match = snip.prompt.to_lowercase().contains(&q);
-                    let tag_match = tag.as_ref()
-                        .map(|t| snip.tags.contains(t))
-                        .unwrap_or(true);
+                    let tag_match = tag.as_ref().map(|t| snip.tags.contains(t)).unwrap_or(true);
                     (name_match || prompt_match) && tag_match
                 })
                 .collect();
@@ -267,7 +302,9 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
             if map.contains_key(&dst) && !force {
                 bail!("'{}' already exists. Use --force.", dst);
             }
-            let snip = map.get(&src).context(format!("Snippet '{}' not found.", src))?;
+            let snip = map
+                .get(&src)
+                .context(format!("Snippet '{}' not found.", src))?;
             let new_snip = Snippet {
                 prompt: snip.prompt.clone(),
                 tags: snip.tags.clone(),
@@ -286,26 +323,31 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
             let total_uses: u32 = map.values().map(|s| s.use_count).sum();
             let mut tag_set = std::collections::HashSet::new();
             for s in map.values() {
-                for t in &s.tags { tag_set.insert(t.clone()); }
+                for t in &s.tags {
+                    tag_set.insert(t.clone());
+                }
             }
             println!("{}", bold("Snippet Stats"));
             println!("  Total snippets : {}", cyan(&total.to_string()));
             println!("  Total uses     : {}", cyan(&total_uses.to_string()));
             println!("  Unique tags    : {}", cyan(&tag_set.len().to_string()));
             let mut top: Vec<_> = map.iter().collect();
-            top.sort_by(|a, b| b.1.use_count.cmp(&a.1.use_count));
+            top.sort_by_key(|b| std::cmp::Reverse(b.1.use_count));
             if let Some((name, snip)) = top.first() {
                 if snip.use_count > 0 {
-                    println!("  Top snippet    : {} ({} uses)", cyan(name), snip.use_count);
+                    println!(
+                        "  Top snippet    : {} ({} uses)",
+                        cyan(name),
+                        snip.use_count
+                    );
                 }
             }
         }
 
         SnippetCmd::Import { file, overwrite } => {
-            let text = std::fs::read_to_string(&file)
-                .context(format!("Cannot read '{file}'"))?;
-            let incoming: HashMap<String, Snippet> = serde_json::from_str(&text)
-                .context("Invalid JSON format")?;
+            let text = std::fs::read_to_string(&file).context(format!("Cannot read '{file}'"))?;
+            let incoming: HashMap<String, Snippet> =
+                serde_json::from_str(&text).context("Invalid JSON format")?;
             let mut map = load()?;
             let mut added = 0usize;
             let mut skipped = 0usize;
@@ -318,7 +360,12 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
                 }
             }
             save(&map)?;
-            println!("{} Imported {} snippet(s), skipped {}", green("[OK]"), added, skipped);
+            println!(
+                "{} Imported {} snippet(s), skipped {}",
+                green("[OK]"),
+                added,
+                skipped
+            );
         }
 
         SnippetCmd::Export { file, tag } => {
@@ -330,7 +377,12 @@ pub fn run(cmd: SnippetCmd) -> Result<()> {
             };
             let text = serde_json::to_string_pretty(&export)?;
             std::fs::write(&file, text)?;
-            println!("{} Exported {} snippet(s) to '{}'", green("[OK]"), export.len(), file);
+            println!(
+                "{} Exported {} snippet(s) to '{}'",
+                green("[OK]"),
+                export.len(),
+                file
+            );
         }
     }
     Ok(())
