@@ -6,9 +6,9 @@ use std::time::Duration;
 use crate::colors::*;
 
 const PRICING: &[(&str, f64, f64)] = &[
-    ("opus",    15.00, 75.00),
-    ("sonnet",   3.00, 15.00),
-    ("haiku",    0.25,  1.25),
+    ("opus", 15.00, 75.00),
+    ("sonnet", 3.00, 15.00),
+    ("haiku", 0.25, 1.25),
 ];
 
 fn projects_dir() -> PathBuf {
@@ -16,7 +16,8 @@ fn projects_dir() -> PathBuf {
 }
 
 fn pricing(model: &str) -> (f64, f64) {
-    PRICING.iter()
+    PRICING
+        .iter()
         .find(|(name, _, _)| model.contains(name))
         .map(|(_, i, o)| (*i, *o))
         .unwrap_or((3.00, 15.00))
@@ -28,10 +29,15 @@ fn calc_cost(input: u64, output: u64, model: &str) -> f64 {
 }
 
 fn short_model(model: &str) -> &str {
-    if model.contains("opus")   { "opus"   }
-    else if model.contains("sonnet") { "sonnet" }
-    else if model.contains("haiku")  { "haiku"  }
-    else                             { "sonnet"  }
+    if model.contains("opus") {
+        "opus"
+    } else if model.contains("sonnet") {
+        "sonnet"
+    } else if model.contains("haiku") {
+        "haiku"
+    } else {
+        "sonnet"
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -59,40 +65,66 @@ fn scan_entries(seen: &HashSet<String>) -> (Vec<Entry>, HashSet<String>) {
     let today = chrono::Local::now().format("%Y-%m-%d").to_string();
 
     for pd in project_dirs.filter_map(|e| e.ok()) {
-        let Ok(files) = std::fs::read_dir(pd.path()) else { continue };
+        let Ok(files) = std::fs::read_dir(pd.path()) else {
+            continue;
+        };
         for file in files.filter_map(|e| e.ok()) {
             let path = file.path();
             if !path.extension().map(|e| e == "jsonl").unwrap_or(false) {
                 continue;
             }
-            let Ok(content) = std::fs::read_to_string(&path) else { continue };
+            let Ok(content) = std::fs::read_to_string(&path) else {
+                continue;
+            };
             for (i, line) in content.lines().enumerate() {
                 let key = format!("{}:{}", path.display(), i);
                 if seen.contains(&key) {
                     continue;
                 }
-                let Ok(val) = serde_json::from_str::<serde_json::Value>(line) else { continue };
-                let Some(usage) = val.get("usage") else { continue };
+                let Ok(val) = serde_json::from_str::<serde_json::Value>(line) else {
+                    continue;
+                };
+                let Some(usage) = val.get("usage") else {
+                    continue;
+                };
                 let ts = val.get("timestamp").and_then(|t| t.as_str()).unwrap_or("");
-                let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) else { continue };
+                let Ok(dt) = chrono::DateTime::parse_from_rfc3339(ts) else {
+                    continue;
+                };
                 let date = dt.format("%Y-%m-%d").to_string();
                 if date != today {
                     new_seen.insert(key);
                     continue;
                 }
-                let time = dt.with_timezone(&chrono::Local).format("%H:%M:%S").to_string();
-                let model = val.get("model")
+                let time = dt
+                    .with_timezone(&chrono::Local)
+                    .format("%H:%M:%S")
+                    .to_string();
+                let model = val
+                    .get("model")
                     .and_then(|m| m.as_str())
                     .unwrap_or("sonnet")
                     .to_string();
-                let input  = usage.get("input_tokens").and_then(|v| v.as_u64()).unwrap_or(0);
-                let output = usage.get("output_tokens").and_then(|v| v.as_u64()).unwrap_or(0);
+                let input = usage
+                    .get("input_tokens")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(0);
+                let output = usage
+                    .get("output_tokens")
+                    .and_then(|v| v.as_u64())
+                    .unwrap_or(0);
                 if input == 0 && output == 0 {
                     new_seen.insert(key);
                     continue;
                 }
                 let cost = calc_cost(input, output, &model);
-                entries.push(Entry { time, model, input, output, cost });
+                entries.push(Entry {
+                    time,
+                    model,
+                    input,
+                    output,
+                    cost,
+                });
                 new_seen.insert(key);
             }
         }
@@ -104,12 +136,24 @@ fn render(all: &[Entry]) {
     // Clear screen with ANSI escape
     print!("\x1b[2J\x1b[H");
 
-    println!("{}", bold("Claude Code — Live Cost Monitor  (Ctrl+C to exit)"));
-    println!("{}", dim("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-    println!(" {:<8} {:<8} {:>9} {:>9}  {}",
-        bold("TIME"), bold("MODEL"), bold("INPUT"), bold("OUTPUT"), bold("COST"));
+    println!(
+        "{}",
+        bold("Claude Code — Live Cost Monitor  (Ctrl+C to exit)")
+    );
+    println!(
+        "{}",
+        dim("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    );
+    println!(
+        " {:<8} {:<8} {:>9} {:>9}  {}",
+        bold("TIME"),
+        bold("MODEL"),
+        bold("INPUT"),
+        bold("OUTPUT"),
+        bold("COST")
+    );
 
-    let mut total_in: u64  = 0;
+    let mut total_in: u64 = 0;
     let mut total_out: u64 = 0;
     let mut total_cost: f64 = 0.0;
 
@@ -117,22 +161,28 @@ fn render(all: &[Entry]) {
         println!("{}", dim("  (waiting for token events...)"));
     } else {
         for e in all {
-            println!(" {:<8} {:<8} {:>9} {:>9}  {}",
+            println!(
+                " {:<8} {:<8} {:>9} {:>9}  {}",
                 dim(&e.time),
                 cyan(short_model(&e.model)),
                 format!("{:>7}", format_num(e.input)),
                 format!("{:>7}", format_num(e.output)),
                 green(&format!("${:.4}", e.cost)),
             );
-            total_in   += e.input;
-            total_out  += e.output;
+            total_in += e.input;
+            total_out += e.output;
             total_cost += e.cost;
         }
     }
 
-    println!("{}", dim("─────────────────────────────────────────────────"));
-    println!(" {:<8} {:<8} {:>9} {:>9}  {}",
-        bold("TOTAL"), "",
+    println!(
+        "{}",
+        dim("─────────────────────────────────────────────────")
+    );
+    println!(
+        " {:<8} {:<8} {:>9} {:>9}  {}",
+        bold("TOTAL"),
+        "",
         format!("{:>7}", format_num(total_in)),
         format!("{:>7}", format_num(total_out)),
         bold(&green(&format!("${:.4}", total_cost))),
@@ -140,11 +190,15 @@ fn render(all: &[Entry]) {
 }
 
 fn format_num(n: u64) -> String {
-    if n == 0 { return "—".to_string(); }
+    if n == 0 {
+        return "—".to_string();
+    }
     let s = n.to_string();
     let mut result = String::new();
     for (i, c) in s.chars().rev().enumerate() {
-        if i > 0 && i % 3 == 0 { result.push(','); }
+        if i > 0 && i % 3 == 0 {
+            result.push(',');
+        }
         result.push(c);
     }
     result.chars().rev().collect()
