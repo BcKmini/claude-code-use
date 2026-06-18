@@ -142,6 +142,28 @@ env: ## Show Claude environment status (requires make install-rust first)
 	@$(RUST_DIR)/target/release/claude-tools env 2>/dev/null \
 	  || $(PYTHON) -c "print('Run: make install-rust first')"
 
+# ─── release / version ─────────────────────────────────────────────────────
+VERSION := $(shell cat VERSION)
+
+.PHONY: tag release bump-patch bump-minor bump-major
+tag: ## Create and push a release tag  (usage: make tag v=1.2.0)
+ifndef v
+	$(error Usage: make tag v=1.2.0)
+endif
+	@echo "$(v)" > VERSION
+	@sed -i.bak 's/^version = .*/version = "$(v)"/' $(RUST_DIR)/claude-tools/Cargo.toml && rm -f $(RUST_DIR)/claude-tools/Cargo.toml.bak
+	git add VERSION $(RUST_DIR)/claude-tools/Cargo.toml
+	git commit -m "chore: bump version to v$(v)"
+	git tag -a "v$(v)" -m "Release v$(v)"
+	git push origin HEAD:main
+	git push origin "v$(v)"
+	@echo ""
+	@echo "  Tag v$(v) pushed → GitHub Actions will build & release automatically."
+	@echo "  Watch: https://github.com/BcKmini/claude-code-use/actions"
+
+version: ## Show current version
+	@echo "Current version: v$(VERSION)"
+
 # ─── clean ─────────────────────────────────────────────────────────────────
 .PHONY: clean clean-handoffs
 clean: ## Remove Rust build artifacts

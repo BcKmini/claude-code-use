@@ -111,25 +111,30 @@ npm install -g @anthropic-ai/claude-code
 claude   # authenticate on first run
 ```
 
-### 2. Clone and install
+### 2. Install (choose one)
 
+**Option A — One-line installer (recommended, macOS / Linux)**
+```bash
+curl -fsSL https://raw.githubusercontent.com/BcKmini/claude-code-use/main/install.sh | bash
+```
+
+**Option B — Specific version**
+```bash
+curl -fsSL https://raw.githubusercontent.com/BcKmini/claude-code-use/main/install.sh | bash -s -- --version v1.0.0
+```
+
+**Option C — Clone and build from source**
 ```powershell
 # Windows
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 powershell -ExecutionPolicy Bypass -File setup-agents.ps1
 ```
 
 ```bash
 # macOS / Linux
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
-bash setup-agents.sh
-```
-
-### 3. Install tools (one command)
-
-```bash
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 make install            # agents + slash commands + Python tools
 make install-rust       # optional: Rust binary (requires cargo)
 ```

@@ -1,0 +1,177 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ── 1. Create the GitHub Release shell ──────────────────────────────────────
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.release.outputs.upload_url }}
+      version:    ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog from git log
+        id: changelog
+        run: |
+          PREV=$(git tag --sort=-version:refname | sed -n '2p')
+          if [ -z "$PREV" ]; then
+            PREV=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "CHANGELOG<<EOF" >> "$GITHUB_ENV"
+          git log --pretty=format:"- %s (%h)" "$PREV"..HEAD >> "$GITHUB_ENV"
+          echo "" >> "$GITHUB_ENV"
+          echo "EOF" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ steps.version.outputs.version }}"
+          body: |
+            ## What's Changed
+            ${{ env.CHANGELOG }}
+
+            ## Installation
+
+            **One-line install (macOS / Linux):**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash
+            ```
+
+            **Windows (PowerShell):**
+            ```powershell
+            irm https://raw.githubusercontent.com/${{ github.repository }}/main/install.ps1 | iex
+            ```
+
+            **Specific version:**
+            ```bash
+            curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/install.sh | bash -s -- --version ${{ github.ref_name }}
+            ```
+
+            See [Setup Guide](docs/SETUP.md) for full instructions.
+          draft: false
+          prerelease: false
+
+  # ── 2. Build Rust binary for each platform ──────────────────────────────────
+  build-release:
+    name: Build (${{ matrix.target }})
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact: claude-tools
+            archive: tar.gz
+
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: claude-tools
+            archive: tar.gz
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: claude-tools
+            archive: tar.gz
+
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: claude-tools.exe
+            archive: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install musl tools (Linux only)
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get install -y musl-tools
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-${{ matrix.target }}-${{ hashFiles('rust/**/Cargo.lock') }}
+
+      - name: Build binary
+        run: cargo build --release --target ${{ matrix.target }}
+        working-directory: rust
+
+      - name: Package (tar.gz — Unix)
+        if: matrix.archive == 'tar.gz'
+        run: |
+          ASSET="claude-tools-${{ needs.create-release.outputs.version }}-${{ matrix.target }}"
+          mkdir -p "$ASSET"
+          cp "rust/target/${{ matrix.target }}/release/claude-tools" "$ASSET/"
+          cp README.md LICENSE "$ASSET/"
+          tar -czf "${ASSET}.tar.gz" "$ASSET"
+          echo "ASSET_PATH=${ASSET}.tar.gz" >> "$GITHUB_ENV"
+          echo "ASSET_NAME=${ASSET}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Package (zip — Windows)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $version = "${{ needs.create-release.outputs.version }}"
+          $asset  = "claude-tools-${version}-${{ matrix.target }}"
+          New-Item -ItemType Directory -Path $asset | Out-Null
+          Copy-Item "rust/target/${{ matrix.target }}/release/claude-tools.exe" "$asset/"
+          Copy-Item README.md, LICENSE "$asset/"
+          Compress-Archive -Path "$asset/*" -DestinationPath "${asset}.zip"
+          echo "ASSET_PATH=${asset}.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "ASSET_NAME=${asset}.zip" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Upload binary to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET_PATH }}
+
+  # ── 3. Package agents + tools as zip ────────────────────────────────────────
+  package-assets:
+    name: Package agents & tools
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package agents
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          zip -r "claude-agents-${VERSION}.zip" agents/ .claude/commands/ snippets/
+          echo "AGENTS_ZIP=claude-agents-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Package Python tools
+        run: |
+          VERSION="${{ needs.create-release.outputs.version }}"
+          zip -r "claude-tools-python-${VERSION}.zip" tools/ snippets/
+          echo "TOOLS_ZIP=claude-tools-python-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Upload assets to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.AGENTS_ZIP }}
+            ${{ env.TOOLS_ZIP }}
