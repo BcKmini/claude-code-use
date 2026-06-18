@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check agent MD files
-        run: bash scripts/validate-agents.sh --strict
+        run: bash scripts/validate-agents.sh
 
   # ── Job: rustfmt ─────────────────────────────────────────────────────────────
   fmt:

@@ -8,28 +8,28 @@ use crate::colors::*;
 
 // Prices per 1M tokens (USD)
 const PRICING: &[(&str, f64, f64)] = &[
-    ("opus",   15.00, 75.00),
-    ("sonnet",  3.00, 15.00),
-    ("haiku",   0.25,  1.25),
+    ("opus", 15.00, 75.00),
+    ("sonnet", 3.00, 15.00),
+    ("haiku", 0.25, 1.25),
 ];
 
 const AGENT_MODELS: &[(&str, &str)] = &[
-    ("orchestrator",        "opus"),
-    ("planner",             "sonnet"),
-    ("implementer",         "sonnet"),
-    ("reviewer",            "sonnet"),
-    ("tester",              "sonnet"),
-    ("security-auditor",    "sonnet"),
-    ("performance-optimizer","sonnet"),
-    ("database-expert",     "sonnet"),
-    ("documenter",          "haiku"),
+    ("orchestrator", "opus"),
+    ("planner", "sonnet"),
+    ("implementer", "sonnet"),
+    ("reviewer", "sonnet"),
+    ("tester", "sonnet"),
+    ("security-auditor", "sonnet"),
+    ("performance-optimizer", "sonnet"),
+    ("database-expert", "sonnet"),
+    ("documenter", "haiku"),
 ];
 
 // Estimated output:input ratio
 const OUTPUT_RATIO: &[(&str, f64)] = &[
-    ("opus",   3.5),
+    ("opus", 3.5),
     ("sonnet", 2.5),
-    ("haiku",  1.5),
+    ("haiku", 1.5),
 ];
 
 fn budget_file() -> PathBuf {
