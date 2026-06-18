@@ -106,20 +106,31 @@ test-agents: ## Verify agent files exist and are non-empty
 	echo "Agents: $$ok OK, $$fail empty"
 
 # ─── lint / format ─────────────────────────────────────────────────────────
-.PHONY: lint fmt
+.PHONY: lint fmt fmt-check
 lint: ## Clippy lint (Rust)
 	cd $(RUST_DIR) && $(CARGO) clippy -- -D warnings
 
-fmt: ## rustfmt + check Python style
-	cd $(RUST_DIR) && $(CARGO) fmt
-	@command -v ruff >/dev/null 2>&1 \
-	  && ruff format $(TOOLS_DIR)/ \
-	  || echo "ruff not found, skipping Python format"
+fmt: ## Format all code (Rust + Python)
+	bash scripts/fmt.sh
+
+fmt-check: ## Check formatting without modifying (CI mode)
+	bash scripts/fmt.sh --check
 
 # ─── dev helpers ───────────────────────────────────────────────────────────
-.PHONY: watch-cost env status
+.PHONY: watch-cost env status dogfood container validate
 watch-cost: ## Live cost monitor (requires claude-tools build)
 	@$(RUST_DIR)/target/release/claude-tools watch --interval 2
+
+dogfood: ## Build from source with provenance check (like claw-code)
+	@bash scripts/dogfood-build.sh
+
+container: ## Build Containerfile (requires Docker / Podman)
+	@command -v docker >/dev/null 2>&1 && docker build -f Containerfile -t claude-agents:dev . \
+	  || command -v podman >/dev/null 2>&1 && podman build -f Containerfile -t claude-agents:dev . \
+	  || { echo "docker or podman required"; exit 1; }
+
+validate: ## Validate agent MD files
+	@bash scripts/validate-agents.sh
 
 env: ## Show Claude environment status
 	@$(RUST_DIR)/target/release/claude-tools env
