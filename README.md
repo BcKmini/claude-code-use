@@ -118,32 +118,21 @@ claude   # authenticate on first run
 curl -fsSL https://raw.githubusercontent.com/BcKmini/claude-code-use/main/install.sh | bash
 ```
 
-**Option B — Specific version**
+**Option B — Clone and build from source**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BcKmini/claude-code-use/main/install.sh | bash -s -- --version v1.0.0
-```
-
-**Option C — Clone and build from source**
-```powershell
-# Windows
 git clone https://github.com/BcKmini/claude-code-use.git
 cd claude-code-use
-powershell -ExecutionPolicy Bypass -File setup-agents.ps1
+bash install.sh          # agents + slash commands + Rust binary
+# or step by step:
+make install             # agents + slash commands + Python tools
+make install-rust        # optional: Rust binary (requires cargo)
 ```
 
-```bash
-# macOS / Linux
-git clone https://github.com/BcKmini/claude-code-use.git
-cd claude-code-use
-make install            # agents + slash commands + Python tools
-make install-rust       # optional: Rust binary (requires cargo)
-```
-
-### 4. Verify
+### 3. Verify
 
 ```
 claude
-/agents          # → 9 agents listed
+/agents          # → 11 agents listed
 /snippet list    # → built-in snippets
 ```
 
@@ -400,6 +389,10 @@ make build          # cargo build --release
 make test           # all tests
 make lint           # clippy + ruff
 make fmt            # rustfmt + ruff format
+make fmt-check      # CI-mode format check (exit 1 if dirty)
+make validate       # lint all agent MD files
+make dogfood        # build with SHA provenance check
+make container      # Docker / Podman image build
 make status         # git log + tool install check
 make env            # Claude environment health check
 make clean          # remove build artifacts
@@ -410,10 +403,10 @@ make clean          # remove build artifacts
 ## Repository Layout
 
 ```
-Claudecode-Agent/
+claude-code-use/
 ├── Makefile                          ← build / install / test / clean
-├── setup-agents.ps1                  ← Windows quick installer
-├── setup-agents.sh                   ← macOS / Linux quick installer
+├── install.sh                        ← one-line installer (source build)
+├── Containerfile                     ← Docker / Podman build
 │
 ├── agents/                           ← agent definitions → ~/.claude/agents/
 │   ├── 00-orchestrator.md
@@ -457,8 +450,13 @@ Claudecode-Agent/
 │   ├── handoff.rs
 │   ├── cost.rs
 │   ├── watch.rs                      ← live cost monitor
-│   ├── env.rs                        ← NEW environment health check
+│   ├── env.rs                        ← environment health check
 │   └── colors.rs
+│
+├── scripts/
+│   ├── dogfood-build.sh              ← source build with SHA provenance
+│   ├── validate-agents.sh            ← lint agent MD files
+│   └── fmt.sh                        ← unified Rust + Python formatter
 │
 └── docs/
     ├── SETUP.md / SETUP.ko.md
@@ -517,8 +515,8 @@ winget install GnuWin32.Make
 
 ## Contributing
 
-- **New tool idea?** → [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md)
-- **Bug?** → [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md)
+- **New tool idea?** → [Feature Request](https://github.com/BcKmini/claude-code-use/issues/new?template=feature_request.md)
+- **Bug?** → [Bug Report](https://github.com/BcKmini/claude-code-use/issues/new?template=bug_report.md)
 - **New snippet?** → add to `snippets/defaults.json` and send a PR
 
 See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full guide.

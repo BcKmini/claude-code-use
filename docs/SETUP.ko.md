@@ -64,25 +64,24 @@ claude --version
 ## 3. 멀티 에이전트 설치
 
 ```bash
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
-```
-
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File setup-agents.ps1
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 ```
 
 ```bash
-# Mac / Linux
-bash setup-agents.sh
+# Mac / Linux (권장)
+bash install.sh
+
+# 또는 단계별
+make install        # 에이전트 + 슬래시 커맨드 + Python 도구
+make install-rust   # 선택: Rust 바이너리
 ```
 
-`~/.claude/agents/`에 9개 에이전트 복사 + `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 영구 설정.
+`~/.claude/agents/`에 11개 에이전트 복사 + `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 영구 설정.
 
 Claude Code 안에서 확인:
 ```
-/agents   # → 9개 에이전트 목록
+/agents   # → 11개 에이전트 목록
 ```
 
 ---
@@ -206,18 +205,20 @@ Claude Code Environment
 
 ---
 
-## 9. claw-code 연동 (선택)
+## 9. Rust 바이너리 (선택)
 
 > 상세 가이드 → [INTEGRATION.ko.md](INTEGRATION.ko.md)
 
 ```bash
+# Rust 툴체인 설치 (없는 경우)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-git clone https://github.com/ultraworkers/claw-code
-cd claw-code/rust
-cargo build --workspace
-export ANTHROPIC_API_KEY="sk-ant-..."
-./target/debug/claw doctor
+# 소스에서 빌드
+cd claude-code-use
+make install-rust        # claude-tools 바이너리 빌드 및 설치
+
+# 또는 인스톨러 사용
+bash install.sh --release
 ```
 
 ---
@@ -231,13 +232,12 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 [ ] 4.  Docker → GitHub MCP 서버 컨테이너 실행
 [ ] 5.  Claude Code에서 GitHub MCP 연결
 [ ] 6.  claude.ai에서 Google Drive MCP 연결
-[ ] 7.  레포 클론 → setup-agents 스크립트 실행
-[ ] 8.  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 설정
-[ ] 9.  ~/.claude/settings.json에 플러그인·설정 적용
-[ ] 10. /agents → 9개 에이전트 확인
-[ ] 11. /mcp → MCP 연결 확인
-[ ] 12. make install  (또는 bash tools/install-tools.sh)
+[ ] 7.  git clone https://github.com/BcKmini/claude-code-use.git
+[ ] 8.  bash install.sh  (또는: make install)
+[ ] 9.  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 설정
+[ ] 10. ~/.claude/settings.json에 플러그인·설정 적용
+[ ] 11. /agents → 11개 에이전트 확인
+[ ] 12. /mcp → MCP 연결 확인
 [ ] 13. make env  → 전부 초록색 확인
 [ ] 14. (선택) make install-rust → claude-tools env
-[ ] 15. (선택) claw doctor 헬스체크
 ```

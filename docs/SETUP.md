@@ -64,25 +64,24 @@ claude --version
 ## 3. Install Multi-Agent System
 
 ```bash
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
-```
-
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File setup-agents.ps1
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 ```
 
 ```bash
-# macOS / Linux
-bash setup-agents.sh
+# macOS / Linux (recommended)
+bash install.sh
+
+# or step by step
+make install        # agents + slash commands + Python tools
+make install-rust   # optional: Rust binary
 ```
 
-Copies 9 agent files to `~/.claude/agents/` and sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
+Copies 11 agent files to `~/.claude/agents/` and sets `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`.
 
 Verify inside Claude Code:
 ```
-/agents   # → 9 agents listed
+/agents   # → 11 agents listed
 ```
 
 ---
@@ -206,18 +205,20 @@ Claude Code Environment
 
 ---
 
-## 9. claw-code Integration (optional)
+## 9. Rust Binary (optional)
 
 > Full guide → [INTEGRATION.md](INTEGRATION.md)
 
 ```bash
+# Install Rust toolchain if needed
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-git clone https://github.com/ultraworkers/claw-code
-cd claw-code/rust
-cargo build --workspace
-export ANTHROPIC_API_KEY="sk-ant-..."
-./target/debug/claw doctor
+# Build from source
+cd claude-code-use
+make install-rust        # builds and installs claude-tools binary
+
+# Or use the installer
+bash install.sh --release
 ```
 
 ---
@@ -231,13 +232,12 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 [ ] 4.  Docker → GitHub MCP container running
 [ ] 5.  GitHub MCP connected in Claude Code
 [ ] 6.  Google Drive MCP connected in claude.ai
-[ ] 7.  Clone repo → run setup-agents script
-[ ] 8.  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 set
-[ ] 9.  Plugins & config in ~/.claude/settings.json
-[ ] 10. /agents → 9 agents listed
-[ ] 11. /mcp → MCP connected
-[ ] 12. make install  (or bash tools/install-tools.sh)
+[ ] 7.  git clone https://github.com/BcKmini/claude-code-use.git
+[ ] 8.  bash install.sh  (or: make install)
+[ ] 9.  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 set
+[ ] 10. Plugins & config in ~/.claude/settings.json
+[ ] 11. /agents → 11 agents listed
+[ ] 12. /mcp → MCP connected
 [ ] 13. make env  → all green
 [ ] 14. (Optional) make install-rust → claude-tools env
-[ ] 15. (Optional) claw doctor health check
 ```

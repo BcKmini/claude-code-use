@@ -113,32 +113,26 @@ claude   # 처음 실행 시 Anthropic 계정 인증
 
 ### 2. 클론 및 설치
 
-```powershell
-# Windows
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
-powershell -ExecutionPolicy Bypass -File setup-agents.ps1
-```
-
+**방법 A — 원라인 설치 (권장, macOS / Linux)**
 ```bash
-# macOS / Linux
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
-bash setup-agents.sh
+curl -fsSL https://raw.githubusercontent.com/BcKmini/claude-code-use/main/install.sh | bash
 ```
 
-### 3. 도구 설치 (한 번에)
-
+**방법 B — 소스 빌드**
 ```bash
-make install            # 에이전트 + 슬래시 커맨드 + Python 도구
-make install-rust       # 선택: Rust 바이너리 (cargo 필요)
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
+bash install.sh          # 에이전트 + 슬래시 커맨드 + Rust 바이너리
+# 또는 단계별:
+make install             # 에이전트 + 슬래시 커맨드 + Python 도구
+make install-rust        # 선택: Rust 바이너리 (cargo 필요)
 ```
 
-### 4. 확인
+### 3. 확인
 
 ```
 claude
-/agents          # → 9개 에이전트 목록
+/agents          # → 11개 에이전트 목록
 /snippet list    # → 기본 스니펫 목록
 ```
 
