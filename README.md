@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/Claudecode-Agent)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/claude-code-use)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
 [![Agents](https://img.shields.io/badge/Agents-11-green?style=flat-square)](#agent-roster)
 [![Tools](https://img.shields.io/badge/Tools-7-informational?style=flat-square)](#tools)
@@ -371,7 +371,7 @@ Claude Code Environment
 
   ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
   ✓ ~/.claude/           exists
-  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/agents/    11 agents installed
   ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
   ✓ handoffs             3 saved, latest: 20250608-143022.md
   ✓ sessions             4 projects, 12 session files

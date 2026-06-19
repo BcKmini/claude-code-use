@@ -18,7 +18,7 @@ Follow these steps in order when setting up a fresh machine or account.
 6. [Plugins](#6-plugins)
 7. [Config Files](#7-config-files)
 8. [Install Tools](#8-install-tools)
-9. [claw-code Integration (optional)](#9-claw-code-integration-optional)
+9. [Rust Binary (optional)](#9-rust-binary-optional)
 10. [Full Reinstall Checklist](#10-full-reinstall-checklist)
 
 ---
@@ -199,7 +199,7 @@ Claude Code Environment
 
   ✓ ANTHROPIC_API_KEY   sk-ant-…
   ✓ ~/.claude/           exists
-  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/agents/    11 agents installed
   ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
 ```
 

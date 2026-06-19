@@ -8,7 +8,7 @@
 
 | System | Role | Link |
 |--------|------|------|
-| Claudecode-Agent | Agent definitions + CLI tools (Python + Rust) | This repo |
+| claude-code-use | Agent definitions + CLI tools (Python + Rust) | This repo |
 | claw-code | CLI harness runtime (open-source Rust CLI) | [ultraworkers/claw-code](https://github.com/ultraworkers/claw-code) |
 
 ---
@@ -47,7 +47,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ```bash
 claw init   # creates .claw, .claw.json, CLAUDE.md
-cp /path/to/Claudecode-Agent/docs/CLAUDE.md ./CLAUDE.md
+cp /path/to/claude-code-use/docs/CLAUDE.md ./CLAUDE.md
 ```
 
 ---
@@ -55,9 +55,9 @@ cp /path/to/Claudecode-Agent/docs/CLAUDE.md ./CLAUDE.md
 ## Architecture
 
 ```
-Claudecode-Agent                 claw-code
+claude-code-use                  claw-code
        |                               |
-  9 agent definitions          CLI harness runtime
+  11 agent definitions          CLI harness runtime
   (roles, tools, prompts)      (session, RAG, events)
        |                               |
   Claude Code CLI               claw CLI
@@ -77,7 +77,7 @@ Claudecode-Agent                 claw-code
 
 ```bash
 claw init
-cp /path/to/Claudecode-Agent/docs/CLAUDE.md ./CLAUDE.md
+cp /path/to/claude-code-use/docs/CLAUDE.md ./CLAUDE.md
 ```
 
 ### 2. Orchestrator Pattern in claw REPL
@@ -172,7 +172,7 @@ Claude Code Environment
 
   ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
   ✓ ~/.claude/           exists
-  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/agents/    11 agents installed
   ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
   ✓ handoffs             3 saved, latest: 20250608-143022.md
   ✓ sessions             4 projects, 12 session files

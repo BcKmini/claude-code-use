@@ -23,8 +23,8 @@ Thank you for helping improve this project!
 ## Development Setup
 
 ```bash
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 python --version   # 3.8+ required
 make status        # check what's installed
 ```

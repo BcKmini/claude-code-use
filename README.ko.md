@@ -9,7 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=flat-square&logo=rust)](https://www.rust-lang.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/Claudecode-Agent)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey?style=flat-square)](https://github.com/BcKmini/claude-code-use)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blueviolet?style=flat-square&logo=anthropic)](https://claude.ai/code)
 [![Agents](https://img.shields.io/badge/Agents-11-green?style=flat-square)](#에이전트-구성)
 [![Tools](https://img.shields.io/badge/Tools-7-informational?style=flat-square)](#도구)
@@ -322,10 +322,59 @@ Claude Code Environment
 
   ✓ ANTHROPIC_API_KEY   sk-ant-…abcd
   ✓ ~/.claude/           exists
-  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/agents/    11 agents installed
   ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
   ✓ handoffs             3 saved, latest: 20250608-143022.md
   ✓ sessions             4 projects, 12 session files
+```
+
+---
+
+### 도구 6 — `claude-harness` — 하네스 검증 & 템플릿 생성
+
+에이전트 하네스 정의를 검증하고 커맨드라인에서 템플릿을 생성합니다.
+
+```bash
+claude-harness check-all                         # agents/의 모든 에이전트 검증
+claude-harness validate agents/09-harness-designer.md   # 단일 에이전트 검증
+claude-harness template tight my-specialist      # 타이트 하네스 템플릿 출력
+claude-harness template adaptive my-orchestrator # 적응형 하네스 템플릿 출력
+```
+
+```
+/harness design automate slow query detection and patching
+/harness validate agents/03-reviewer.md
+/harness types
+```
+
+**각 에이전트에 수행되는 검사:**
+- 역할이 명확히 범위 지정되었는지
+- 출력 형식이 제한되었는지
+- 금지된 동작이 명시되었는지
+- 도구 목록이 최소한인지
+- 이중 언어 지원이 포함되어 있는지
+
+---
+
+### 도구 7 — `claude-pipeline` — 파이프라인 추적 & 보고
+
+다단계 AI 파이프라인 실행을 추적하고, 단계 결과를 기록하며, 마크다운 실행 보고서를 생성합니다.
+
+```bash
+claude-pipeline init slow-query-fix              # 파이프라인 생성 및 활성화
+claude-pipeline stage "detection" start
+claude-pipeline stage "detection" pass --note "slow query 3개 발견"
+claude-pipeline stage "patch-gen" start
+claude-pipeline stage "patch-gen" warn --note "쿼리 1개 안전한 수정 없음"
+claude-pipeline status                           # 현재 상태 표시
+claude-pipeline report                           # 마크다운 실행 보고서
+claude-pipeline list                             # 저장된 파이프라인 전체 목록
+```
+
+```
+/pipeline run analyze slow queries and generate patches with review loop
+/pipeline status
+/pipeline stages
 ```
 
 ---
@@ -340,6 +389,10 @@ make build          # cargo build --release
 make test           # 전체 테스트
 make lint           # clippy + ruff
 make fmt            # rustfmt + ruff format
+make fmt-check      # CI 모드 포맷 검사 (변경 있으면 exit 1)
+make validate       # 에이전트 MD 파일 린트
+make dogfood        # SHA 증명 포함 소스 빌드
+make container      # Docker / Podman 이미지 빌드
 make status         # git log + 도구 설치 상태 확인
 make env            # Claude 환경 헬스체크
 make clean          # 빌드 아티팩트 제거
@@ -350,37 +403,65 @@ make clean          # 빌드 아티팩트 제거
 ## 저장소 구조
 
 ```
-Claudecode-Agent/
+claude-code-use/
 ├── Makefile                          ← 빌드 / 설치 / 테스트 / 정리
-├── setup-agents.ps1                  ← Windows 빠른 설치
-├── setup-agents.sh                   ← macOS / Linux 빠른 설치
+├── install.sh                        ← 원라인 설치 (소스 빌드)
+├── Containerfile                     ← Docker / Podman 빌드
 │
 ├── agents/                           ← 에이전트 정의 → ~/.claude/agents/
-│   ├── 00-orchestrator.md  ·  01-planner.md  ·  02-implementer.md
-│   ├── 03-reviewer.md  ·  04-tester.md  ·  05-security-auditor.md
-│   ├── 06-performance-optimizer.md  ·  07-database-expert.md
-│   └── 08-documenter.md
+│   ├── 00-orchestrator.md
+│   ├── 01-planner.md
+│   ├── 02-implementer.md
+│   ├── 03-reviewer.md
+│   ├── 04-tester.md
+│   ├── 05-security-auditor.md
+│   ├── 06-performance-optimizer.md
+│   ├── 07-database-expert.md
+│   ├── 08-documenter.md
+│   ├── 09-harness-designer.md        ← 하네스 설계 에이전트
+│   └── 10-pipeline-orchestrator.md  ← 파이프라인 관리 에이전트
 │
 ├── .claude/commands/                 ← 슬래시 커맨드 → ~/.claude/commands/
-│   ├── snippet.md  ·  handoff.md  ·  cost.md
-│   ├── review-diff.md                ← 신규
-│   └── remind.md                     ← 신규
+│   ├── snippet.md
+│   ├── handoff.md
+│   ├── cost.md
+│   ├── review-diff.md
+│   ├── remind.md
+│   ├── harness.md                    ← /harness
+│   └── pipeline.md                   ← /pipeline
 │
-├── snippets/defaults.json            ← 기본 프롬프트 템플릿 20개
+├── snippets/
+│   └── defaults.json                 ← 기본 프롬프트 템플릿 20개
 │
 ├── tools/
-│   ├── snippet.py  ·  claude-handoff.py  ·  claude-cost.py
-│   ├── claude-review-diff.py         ← 신규
-│   ├── claude-remind.py              ← 신규
-│   ├── install-tools.ps1  ·  install-tools.sh
+│   ├── snippet.py                    ← 프롬프트 매니저 CLI
+│   ├── claude-handoff.py             ← 세션 연속성 CLI
+│   ├── claude-cost.py                ← 비용 추정 CLI
+│   ├── claude-review-diff.py
+│   ├── claude-remind.py
+│   ├── claude-harness.py             ← 하네스 검증 + 템플릿 생성
+│   ├── claude-pipeline.py            ← 파이프라인 추적 + 보고
+│   ├── install-tools.ps1             ← Windows 도구 설치
+│   └── install-tools.sh              ← macOS/Linux 도구 설치
 │
 ├── rust/claude-tools/src/
-│   ├── main.rs  ·  snippet.rs  ·  handoff.rs  ·  cost.rs
-│   ├── watch.rs  ·  env.rs (신규)  ·  colors.rs
+│   ├── main.rs
+│   ├── snippet.rs
+│   ├── handoff.rs
+│   ├── cost.rs
+│   ├── watch.rs                      ← 실시간 비용 모니터
+│   ├── env.rs                        ← 환경 헬스체크
+│   └── colors.rs
+│
+├── scripts/
+│   ├── dogfood-build.sh              ← SHA 증명 포함 소스 빌드
+│   ├── validate-agents.sh            ← 에이전트 MD 파일 린트
+│   └── fmt.sh                        ← Rust + Python 통합 포맷터
 │
 └── docs/
     ├── SETUP.md / SETUP.ko.md
     ├── AGENT-CHEATSHEET.md / .ko.md
+    ├── HARNESS-GUIDE.md / .ko.md      ← 하네스 설계 가이드
     ├── INTEGRATION.md / .ko.md
     ├── CONTRIBUTING.md / .ko.md
     └── CLAUDE.md / .ko.md
@@ -437,6 +518,7 @@ winget install GnuWin32.Make
 |------|--------|---------|
 | 환경 세팅 가이드 | [SETUP.ko.md](docs/SETUP.ko.md) | [SETUP.md](docs/SETUP.md) |
 | 에이전트 치트시트 | [AGENT-CHEATSHEET.ko.md](docs/AGENT-CHEATSHEET.ko.md) | [AGENT-CHEATSHEET.md](docs/AGENT-CHEATSHEET.md) |
+| 하네스 가이드 | [HARNESS-GUIDE.ko.md](docs/HARNESS-GUIDE.ko.md) | [HARNESS-GUIDE.md](docs/HARNESS-GUIDE.md) |
 | 통합 가이드 | [INTEGRATION.ko.md](docs/INTEGRATION.ko.md) | [INTEGRATION.md](docs/INTEGRATION.md) |
 | 기여 가이드 | [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md) | [CONTRIBUTING.md](docs/CONTRIBUTING.md) |
 | 코딩 가이드라인 | [CLAUDE.ko.md](docs/CLAUDE.ko.md) | [CLAUDE.md](docs/CLAUDE.md) |
@@ -445,8 +527,8 @@ winget install GnuWin32.Make
 
 ## 기여하기
 
-- **새 도구 아이디어** → [Feature Request](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=feature_request.md)
-- **버그 발견** → [Bug Report](https://github.com/BcKmini/Claudecode-Agent/issues/new?template=bug_report.md)
+- **새 도구 아이디어** → [Feature Request](https://github.com/BcKmini/claude-code-use/issues/new?template=feature_request.md)
+- **버그 발견** → [Bug Report](https://github.com/BcKmini/claude-code-use/issues/new?template=bug_report.md)
 - **새 스니펫** → `snippets/defaults.json`에 추가 후 PR
 
 전체 가이드 → [CONTRIBUTING.ko.md](docs/CONTRIBUTING.ko.md)

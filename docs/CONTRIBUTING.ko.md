@@ -23,8 +23,8 @@
 ## 개발 환경 설정
 
 ```bash
-git clone https://github.com/BcKmini/Claudecode-Agent.git
-cd Claudecode-Agent
+git clone https://github.com/BcKmini/claude-code-use.git
+cd claude-code-use
 python --version   # 3.8+ 필요
 make status        # 설치 상태 확인
 ```

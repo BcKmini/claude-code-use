@@ -18,7 +18,7 @@
 6. [플러그인](#6-플러그인)
 7. [기본 설정 파일](#7-기본-설정-파일)
 8. [도구 설치](#8-도구-설치)
-9. [claw-code 연동 (선택)](#9-claw-code-연동-선택)
+9. [Rust 바이너리 (선택)](#9-rust-바이너리-선택)
 10. [전체 재설치 체크리스트](#10-전체-재설치-체크리스트)
 
 ---
@@ -199,7 +199,7 @@ Claude Code Environment
 
   ✓ ANTHROPIC_API_KEY   sk-ant-…
   ✓ ~/.claude/           exists
-  ✓ ~/.claude/agents/    9 agents installed
+  ✓ ~/.claude/agents/    11 agents installed
   ✓ ~/.claude/commands/  5 commands: snippet, handoff, cost, review-diff, remind
 ```
 
